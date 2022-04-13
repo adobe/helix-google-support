@@ -24,6 +24,9 @@ module.exports = {
   rules: {
     'import/extensions': [2, 'ignorePackages'],
     'import/prefer-default-export': 0,
+    // due to an issue, package exported submodules don't work yet
+    // see: https://github.com/import-js/eslint-plugin-import/issues/1810
+    'import/no-unresolved': [2, { ignore: ['@adobe/helix-onedrive-support/utils'] }],
   },
   globals: {
     __rootdir: true,

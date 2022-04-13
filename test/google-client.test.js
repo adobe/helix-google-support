@@ -9,15 +9,15 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
 /* eslint-env mocha */
-
 import assert from 'assert';
-import { main } from '../src/index.js';
+import { GoogleClient } from '../src/index.js';
 
-describe('Index Tests', () => {
-  it('index function is present', async () => {
-    const result = await main();
-    assert.strictEqual(result, 'Hello, world.');
+describe('google helpers tests', () => {
+  it('properly maps id to url', async () => {
+    assert.strictEqual(GoogleClient.id2Url(''), '');
+    assert.strictEqual(GoogleClient.id2Url(undefined), undefined);
+    assert.strictEqual(GoogleClient.id2Url('1234'), 'gdrive:1234');
+    assert.strictEqual(GoogleClient.id2Url('gdrive:foobar'), 'gdrive:foobar');
   });
 });
