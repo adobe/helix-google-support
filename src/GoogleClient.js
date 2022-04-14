@@ -10,9 +10,34 @@
  * governing permissions and limitations under the License.
  */
 import { google } from 'googleapis';
-import { editDistance, sanitizeName, splitByExtension } from '@adobe/helix-onedrive-support/utils';
+import {
+  editDistance, sanitizeName, splitByExtension,
+} from '@adobe/helix-onedrive-support/utils';
+import { StatusCodeError } from '@adobe/helix-onedrive-support';
 import { GoogleTokenCache } from './GoogleTokenCache.js';
 import cache from './cache.js';
+
+/**
+ * @typedef DriveItemInfo {
+ * @property {string} id
+ * @property {string} name
+ * @property {string} url
+ * @property {string} path
+ */
+
+/**
+ * Adds the last modified property if defined in item
+ * @param {DriveItemInfo} itemInfo
+ * @param item
+ * @returns {DriveItemInfo}
+ */
+function addLastModified(itemInfo, item) {
+  if (item.modifiedTime) {
+    // eslint-disable-next-line no-param-reassign
+    itemInfo.lastModified = Date.parse(item.modifiedTime);
+  }
+  return itemInfo;
+}
 
 /**
  * Google auth client
@@ -35,22 +60,26 @@ export class GoogleClient {
    * @param {ICachePlugin} plugin
    */
   constructor(opts) {
-    this.log = opts.log;
-    this.auth = new google.auth.OAuth2(
-      opts.clientId,
-      opts.clientSecret,
-      opts.redirectUri,
-    );
-    this.cachePlugin = opts.cachePlugin;
-    this.cache = new GoogleTokenCache(opts.cachePlugin).withLog(opts.log);
+    Object.assign(this, {
+      log: opts.log,
+      auth: new google.auth.OAuth2(
+        opts.clientId,
+        opts.clientSecret,
+        opts.redirectUri,
+      ),
+    });
 
-    /// hack to capture tokens, since the emit handler is not awaited in the google client
-    const originalRefreshTokenNoCache = this.auth.refreshTokenNoCache.bind(this.auth);
-    this.auth.refreshTokenNoCache = async (...args) => {
-      const ret = await originalRefreshTokenNoCache(...args);
-      await this.cache.store(ret.tokens);
-      return ret;
-    };
+    if (opts.cachePlugin) {
+      this.cachePlugin = opts.cachePlugin;
+      this.cache = new GoogleTokenCache(opts.cachePlugin).withLog(opts.log);
+      /// hack to capture tokens, since the emit handler is not awaited in the google client
+      const originalRefreshTokenNoCache = this.auth.refreshTokenNoCache.bind(this.auth);
+      this.auth.refreshTokenNoCache = async (...args) => {
+        const ret = await originalRefreshTokenNoCache(...args);
+        await this.cache.store(ret.tokens);
+        return ret;
+      };
+    }
 
     this.drive = google.drive({
       version: 'v3',
@@ -58,16 +87,18 @@ export class GoogleClient {
     });
 
     /**
-     * Cached version of `getUncachedItemsFromPath`
+     * Cached version of `getUncachedItemsFromSegments`
      */
-    this.getDriveItemsFromPath = cache(this.getUncachedItemsFromPath.bind(this), {
-      hash: (fn, path, parentId) => `${parentId}:${path}`,
+    this.getDriveItemsFromSegments = cache(this.getUncachedItemsFromSegments.bind(this), {
+      hash: (fn, segs, parentId) => `${parentId}:${segs.join('/')}`,
     });
   }
 
   async init() {
-    await this.cache.load();
-    this.auth.setCredentials(this.cache.tokens);
+    if (this.cache) {
+      await this.cache.load();
+      this.auth.setCredentials(this.cache.tokens);
+    }
     return this;
   }
 
@@ -75,28 +106,40 @@ export class GoogleClient {
     return this.auth.generateAuthUrl(...args);
   }
 
+  /**
+   * Sets the credentials
+   * @param tokens
+   * @returns {Promise<void>}
+   */
   async setCredentials(tokens) {
-    await this.cache.store(tokens);
+    if (this.cache) {
+      await this.cache.store(tokens);
+    }
     this.auth.setCredentials(tokens);
   }
 
+  /**
+   * Returns the token for the given code
+   * @param {string} code
+   * @returns {Promise<*>}
+   */
   async getToken(code) {
-    const resp = await this.auth.getToken(code);
-    await this.cache.store(resp.tokens);
-    return resp;
+    const { tokens } = await this.auth.getToken(code);
+    if (this.cache) {
+      await this.cache.store(tokens);
+    }
+    return tokens;
   }
 
   /**
-   * @param {Drive} drive
-   * @param {AdminContext} context
    * @param {string} path
    * @param {string} parentId
    * @param {string} parentPath
-   * @returns {Promise<EditFolderInfo[]>}
+   * @returns {Promise<DriveItemInfo[]>}
    */
-  async getUncachedItemsFromPath(path, parentId, parentPath) {
+  async getUncachedItemsFromSegments(pathSegments, parentId, parentPath) {
     const { log, drive } = this;
-    const [name, ...rest] = path.split('/');
+    const name = pathSegments.shift();
     const [baseName, ext] = splitByExtension(name);
     const sanitizedName = sanitizeName(baseName);
 
@@ -106,7 +149,7 @@ export class GoogleClient {
         `'${parentId}' in parents`,
         'and trashed=false',
         // folder if path continues, sheet otherwise
-        `and mimeType ${rest.length ? '=' : '!='} 'application/vnd.google-apps.folder'`,
+        `and mimeType ${pathSegments.length ? '=' : '!='} 'application/vnd.google-apps.folder'`,
       ].join(' '),
       fields: 'nextPageToken, files(id, name, modifiedTime)',
       includeItemsFromAllDrives: true,
@@ -163,35 +206,39 @@ export class GoogleClient {
     }
 
     const itemPath = `${parentPath}/${sanitizedName}`;
-    const children = rest.length
+    const children = pathSegments.length
       // eslint-disable-next-line no-use-before-define
-      ? await this.getDriveItemsFromPath(rest.join('/'), item.id, itemPath)
+      ? await this.getDriveItemsFromSegments(pathSegments, item.id, itemPath)
       : [];
 
     if (!children) {
       return null;
     }
 
-    const pathItem = {
+    const pathItem = addLastModified({
       name,
       path: itemPath,
       id: item.id,
-      lastModified: Date.parse(item.modifiedTime),
-    };
+    }, item);
 
     return [...children, pathItem];
   }
 
   /**
    * returns the items hierarchy for the given path and root id, starting with the given path.
-   * @param context
    * @param path
    * @param rootId
+   * @return {DriveItemInfo[]}
    */
   async getItemsFromPath(path, rootId) {
-    const result = await this.getDriveItemsFromPath(path, rootId, '');
+    const segs = path.split('/');
+    if (!segs[0]) {
+      // if path starts with '/' the first segment is empty
+      segs.shift();
+    }
+    const result = await this.getDriveItemsFromSegments(segs, rootId, '');
     if (!result) {
-      return null;
+      return [];
     }
     return [...result, {
       name: '',
@@ -202,11 +249,9 @@ export class GoogleClient {
 
   /**
    * returns the items hierarchy for the given item, starting with the given id
-   * @param {AdminContext} context
-   * @param {Drive} drive
    * @param {string} fileId
    * @param {object} roots
-   * @returns {Promise<EditFolderInfo[]>}
+   * @returns {Promise<DriveItemInfo[]>}
    */
   async getItems(fileId, roots) {
     const { log } = this;
@@ -223,62 +268,84 @@ export class GoogleClient {
     const root = roots[fileId];
     if (root) {
       // stop at mount root
-      return [{
+      return [addLastModified({
         id: fileId,
         name: '',
         path: root,
-        lastModified: Date.parse(data.modifiedTime),
-      }];
+      }, data)];
     }
 
     const parentId = data.parents ? data.parents[0] : '';
     if (!parentId) {
       // outside mountpoint
-      return [{
+      return [addLastModified({
         id: fileId,
         name: data.name,
         path: `/root:/${data.name}`,
-        lastModified: Date.parse(data.modifiedTime),
-      }];
+      }, data)];
     }
 
     const ancestors = await this.getItems(data.parents[0], roots);
     const parentPath = ancestors[0].path.replace(/\/+$/, '');
-    ancestors.unshift({
+    ancestors.unshift(addLastModified({
       id: fileId,
       name: data.name,
       path: `${parentPath}/${data.name}`,
-      lastModified: Date.parse(data.modifiedTime),
-    });
+    }, data));
     return ancestors;
   }
 
   /**
-   * @param {AdminContext} context
    * @param {string} fileId
    * @param {object} roots
-   * @returns {Promise<EditFolderInfo[]>}
+   * @returns {Promise<DriveItemInfo[]>}
    */
   async getItemsFromId(fileId, roots) {
     const { log } = this;
     try {
       return await this.getItems(fileId, roots);
     } catch (e) {
+      if (e.response && e.response.status === 404) {
+        log.warn(`unable to get items for ${fileId}. Not found`);
+        return [];
+      }
       log.warn(`unable to get items for ${fileId}. ${e}`);
-      return [];
+      throw e;
     }
   }
 
   /**
-   * @param {AdminContext} context
    * @param {string} fileId
    * @returns {string} file data
    */
   async getFile(fileId) {
-    const res = await this.drive.files.get({
-      fileId,
-      alt: 'media',
+    try {
+      const res = await this.drive.files.get({
+        fileId,
+        alt: 'media',
+      });
+      return res.data;
+    } catch (e) {
+      if (e.response && e.response.status === 404) {
+        throw new StatusCodeError(`Not Found: ${fileId}`, 404);
+      }
+      throw e;
+    }
+  }
+
+  async getDocument(documentId) {
+    const docs = google.docs({
+      version: 'v1',
+      auth: this.auth,
     });
-    return res.data;
+    try {
+      const res = await docs.documents.get({ documentId });
+      return res.data;
+    } catch (e) {
+      if (e.response && e.response.status === 404) {
+        throw new StatusCodeError(`Not Found: ${documentId}`, 404);
+      }
+      throw e;
+    }
   }
 }
