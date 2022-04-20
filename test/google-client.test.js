@@ -14,7 +14,6 @@ import assert from 'assert';
 import { decode } from 'querystring';
 import { MemCachePlugin } from '@adobe/helix-onedrive-support';
 import { GoogleClient } from '../src/index.js';
-import cache from '../src/cache.js';
 import { Nock } from './utils.js';
 
 describe('GoogleClient tests', () => {
@@ -29,7 +28,7 @@ describe('GoogleClient tests', () => {
   let cachePlugin;
   beforeEach(() => {
     // clear cache for tests
-    cache.options({ max: 1000 });
+    GoogleClient.setItemCacheOptions({ max: 1000 });
     nock = new Nock();
 
     cachePlugin = new MemCachePlugin({
