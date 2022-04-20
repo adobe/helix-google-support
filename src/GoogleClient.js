@@ -44,6 +44,16 @@ function addLastModified(itemInfo, item) {
  */
 export class GoogleClient {
   /**
+   * Sets the global item cache options. It internally creates a new LRU
+   * with the given options
+   *
+   * @param opts
+   */
+  static setItemCacheOptions(opts) {
+    cache.options(opts);
+  }
+
+  /**
    * Returns a url for a google drive id.
    * @param {string} id
    * @returns {string}
