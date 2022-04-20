@@ -4,7 +4,7 @@
     "text"
   ],
   "check-coverage": true,
-  "lines": 42,
+  "lines": 100,
   "branches": 100,
-  "statements": 42
+  "statements": 100
 }
