@@ -9,13 +9,15 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import LRU from 'lru-cache';
 import { google } from 'googleapis';
 import {
   editDistance, sanitizeName, splitByExtension,
 } from '@adobe/helix-onedrive-support/utils';
 import { StatusCodeError } from '@adobe/helix-onedrive-support';
 import { GoogleTokenCache } from './GoogleTokenCache.js';
-import cache from './cache.js';
+
+let lru = new LRU({ max: 1000, ttl: 60000 });
 
 /**
  * @typedef DriveItemInfo {
@@ -39,6 +41,19 @@ function addLastModified(itemInfo, item) {
   return itemInfo;
 }
 
+function createPathSegments(path) {
+  const pathSegments = path.split('/');
+  if (!pathSegments[0]) {
+    // if path starts with '/' the first segment is empty
+    pathSegments.shift();
+  }
+  return pathSegments;
+}
+
+function getCacheKey(parentId, pathSegments) {
+  return `${parentId}:${pathSegments.join('/')}`;
+}
+
 /**
  * Google auth client
  */
@@ -50,7 +65,7 @@ export class GoogleClient {
    * @param opts
    */
   static setItemCacheOptions(opts) {
-    cache.options(opts);
+    lru = new LRU(opts);
   }
 
   /**
@@ -95,13 +110,6 @@ export class GoogleClient {
       version: 'v3',
       auth: this.auth,
     });
-
-    /**
-     * Cached version of `getUncachedItemsFromSegments`
-     */
-    this.getDriveItemsFromSegments = cache(this.getUncachedItemsFromSegments.bind(this), {
-      hash: (fn, segs, parentId) => `${parentId}:${segs.join('/')}`,
-    });
   }
 
   async init() {
@@ -142,10 +150,10 @@ export class GoogleClient {
   }
 
   /**
-   * @param {string} path
+   * @param {string[]} pathSegments
    * @param {string} parentId
    * @param {string} parentPath
-   * @returns {Promise<DriveItemInfo[]>}
+   * @returns {Promise<DriveItemInfo[]>|null}
    */
   async getUncachedItemsFromSegments(pathSegments, parentId, parentPath) {
     const { log, drive } = this;
@@ -224,14 +232,48 @@ export class GoogleClient {
     if (!children) {
       return null;
     }
-
     const pathItem = addLastModified({
       name,
       path: itemPath,
       id: item.id,
     }, item);
 
+    if (children.length) {
+      // add parent references not-enumerable to avoid deep structures during serialization
+      Object.defineProperty(children[children.length - 1], 'parent', {
+        enumerable: false,
+        value: pathItem,
+      });
+    }
+
     return [...children, pathItem];
+  }
+
+  /**
+   * @param {string} pathSegments
+   * @param {string} parentId
+   * @param {string} parentPath
+   * @returns {Promise<DriveItemInfo[]>|null}
+   */
+  async getDriveItemsFromSegments(pathSegments, parentId, parentPath) {
+    const key = getCacheKey(parentId, pathSegments);
+    let items = lru.get(key);
+    if (items) {
+      return items;
+    }
+    items = await this.getUncachedItemsFromSegments(pathSegments, parentId, parentPath);
+    if (items) {
+      lru.set(key, items);
+      // add invalidation function as not-enumerable to keep compatible objects
+      Object.defineProperty(items[items.length - 1], 'invalidate', {
+        enumerable: false,
+        value() {
+          lru.delete(key);
+          this.parent?.invalidate();
+        },
+      });
+    }
+    return items;
   }
 
   /**
@@ -241,11 +283,7 @@ export class GoogleClient {
    * @return {DriveItemInfo[]}
    */
   async getItemsFromPath(path, rootId) {
-    const segs = path.split('/');
-    if (!segs[0]) {
-      // if path starts with '/' the first segment is empty
-      segs.shift();
-    }
+    const segs = createPathSegments(path);
     const result = await this.getDriveItemsFromSegments(segs, rootId, '');
     if (!result) {
       return [];
@@ -325,6 +363,25 @@ export class GoogleClient {
   }
 
   /**
+   * Returns the (cached) item for the given path or {@code null} if the item cannot be found.
+   * The item will contains a `invalidate()` method which can be used to remove it from the cache.
+   *
+   * @param {string} rootId
+   * @param {string} path
+   * @returns {Promise<DriveItemInfo>}
+   */
+  async getItemFromPath(rootId, path) {
+    const segs = createPathSegments(path);
+    const items = await this.getDriveItemsFromSegments(segs, rootId, '');
+    const item = items?.[0];
+    if (!item) {
+      return null;
+    }
+    return item;
+  }
+
+  /**
+   * Returns an (uncached) file directly via the google api
    * @param {string} fileId
    * @returns {string} file data
    */
@@ -343,6 +400,11 @@ export class GoogleClient {
     }
   }
 
+  /**
+   * Returns an (uncached) document directly via the google api
+   * @param {string} documentId
+   * @returns {object} document
+   */
   async getDocument(documentId) {
     const docs = google.docs({
       version: 'v1',
