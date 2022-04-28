@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/adobe/helix-google-support/compare/v1.2.2...v1.3.0) (2022-04-28)
+
+
+### Features
+
+* handle getItemForPath() with no path ([#12](https://github.com/adobe/helix-google-support/issues/12)) ([0e1b60d](https://github.com/adobe/helix-google-support/commit/0e1b60d6612b3628193b9188eadc230de2894aff))
+
 ## [1.2.2](https://github.com/adobe/helix-google-support/compare/v1.2.1...v1.2.2) (2022-04-28)
 
 
