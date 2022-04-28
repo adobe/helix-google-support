@@ -130,21 +130,25 @@ describe('GoogleClient tests', () => {
           lastModified: 1928905181000,
           name: 'structure',
           path: '/deeply/nested/structure',
+          mimeType: 'application/vnd.google-apps.sheets',
         },
         {
           id: 124,
           name: 'nested',
           path: '/deeply/nested',
+          mimeType: 'application/vnd.google-apps.folder',
         },
         {
           id: 123,
           name: 'deeply',
           path: '/deeply',
+          mimeType: 'application/vnd.google-apps.folder',
         },
         {
           id: '1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP',
           name: '',
           path: '/',
+          mimeType: 'application/vnd.google-apps.folder',
         },
       ]);
     });
@@ -281,6 +285,7 @@ describe('GoogleClient tests', () => {
         id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUw',
         name: 'structure',
         path: '/deeply/nested/structure',
+        mimeType: 'application/vnd.google-apps.sheets',
       });
 
       // fetch again (from cache)
