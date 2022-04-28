@@ -169,7 +169,7 @@ export class GoogleClient {
         // folder if path continues, sheet otherwise
         `and mimeType ${pathSegments.length ? '=' : '!='} 'application/vnd.google-apps.folder'`,
       ].join(' '),
-      fields: 'nextPageToken, files(id, name, modifiedTime)',
+      fields: 'nextPageToken, files(id, name, mimeType, modifiedTime)',
       includeItemsFromAllDrives: true,
       supportsAllDrives: true,
       pageSize: 1000,
