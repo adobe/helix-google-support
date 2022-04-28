@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/adobe/helix-google-support/compare/v1.2.0...v1.2.1) (2022-04-28)
+
+
+### Bug Fixes
+
+* include mimeType ([#10](https://github.com/adobe/helix-google-support/issues/10)) ([993e24a](https://github.com/adobe/helix-google-support/commit/993e24acdd723402a6d85a8bf74e3b93df8c5d0e))
+
 # [1.2.0](https://github.com/adobe/helix-google-support/compare/v1.1.0...v1.2.0) (2022-04-28)
 
 
