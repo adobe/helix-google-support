@@ -312,6 +312,7 @@ export class GoogleClient {
       fields: [
         'name',
         'parents',
+        'mimeType',
         'modifiedTime',
       ].join(','),
     }));
@@ -374,6 +375,30 @@ export class GoogleClient {
    * @returns {Promise<DriveItemInfo>}
    */
   async getItemFromPath(parentId, path) {
+    if (!path) {
+      try {
+        const { data } = (await this.drive.files.get({
+          fileId: parentId,
+          fields: [
+            'name',
+            'parents',
+            'mimeType',
+            'modifiedTime',
+          ].join(','),
+        }));
+
+        return addLastModified({
+          id: parentId,
+          path: `/${data.name}`,
+        }, data);
+      } catch (e) {
+        if (e.response && e.response.status === 404) {
+          return null;
+        }
+        throw e;
+      }
+    }
+
     const segs = createPathSegments(path);
     const items = await this.getDriveItemsFromSegments(parentId, segs, '');
     const item = items?.[0];
