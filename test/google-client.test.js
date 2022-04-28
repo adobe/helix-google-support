@@ -334,6 +334,76 @@ describe('GoogleClient tests', () => {
       const item = await client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP', '/deeply/nested/missing');
       assert.deepStrictEqual(item, null);
     });
+
+    it('getItemFromPath returns item for no path', async () => {
+      nock.loginGoogle(1);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP')
+        .query({
+          fields: 'name,parents,mimeType,modifiedTime',
+        })
+        .reply(200, {
+          id: '1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys',
+          name: 'helix-hackathon-part-v',
+          modifiedTime: 'Mon, 14 Jun 2021 03:37:28 GMT',
+          parents: [
+            '1BHM3lyqi0bEeaBZho8UD328oFsmsisyJ',
+          ],
+        });
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      const item = await client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP');
+      assert.deepStrictEqual(item, {
+        id: '1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP',
+        lastModified: 1623641848000,
+        path: '/helix-hackathon-part-v',
+      });
+    });
+
+    it('getItemFromPath returns null for no path and not found', async () => {
+      nock.loginGoogle(1);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP')
+        .query({
+          fields: 'name,parents,mimeType,modifiedTime',
+        })
+        .reply(404);
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      const item = await client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP');
+      assert.deepStrictEqual(item, null);
+    });
+
+    it('getItemFromPath handles error for no path', async () => {
+      nock.loginGoogle(1);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP')
+        .query({
+          fields: 'name,parents,mimeType,modifiedTime',
+        })
+        .reply(401);
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      await assert.rejects(client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP'), new Error(''));
+    });
   });
 
   it('generateAuthUrl correctly', async () => {
@@ -400,7 +470,7 @@ describe('GoogleClient tests', () => {
       nock('https://www.googleapis.com')
         .get('/drive/v3/files/1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys')
         .query({
-          fields: 'name,parents,modifiedTime',
+          fields: 'name,parents,mimeType,modifiedTime',
         })
         .reply(200, {
           id: '1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys',
@@ -412,7 +482,7 @@ describe('GoogleClient tests', () => {
         })
         .get('/drive/v3/files/1BHM3lyqi0bEeaBZho8UD328oFsmsisyJ')
         .query({
-          fields: 'name,parents,modifiedTime',
+          fields: 'name,parents,mimeType,modifiedTime',
         })
         .reply(200, {
           id: '1BHM3lyqi0bEeaBZho8UD328oFsmsisyJ',
@@ -424,7 +494,7 @@ describe('GoogleClient tests', () => {
         })
         .get('/drive/v3/files/1vjng4ahZWph-9oeaMae16P9Kbb3xg4Cg')
         .query({
-          fields: 'name,parents,modifiedTime',
+          fields: 'name,parents,mimeType,modifiedTime',
         })
         .reply(200, {
           id: '1vjng4ahZWph-9oeaMae16P9Kbb3xg4Cg',
@@ -468,7 +538,7 @@ describe('GoogleClient tests', () => {
       nock('https://www.googleapis.com')
         .get('/drive/v3/files/1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys')
         .query({
-          fields: 'name,parents,modifiedTime',
+          fields: 'name,parents,mimeType,modifiedTime',
         })
         .reply(200, {
           id: '1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys',
@@ -480,7 +550,7 @@ describe('GoogleClient tests', () => {
         })
         .get('/drive/v3/files/1BHM3lyqi0bEeaBZho8UD328oFsmsisyJ')
         .query({
-          fields: 'name,parents,modifiedTime',
+          fields: 'name,parents,mimeType,modifiedTime',
         })
         .reply(200, {
           id: '1BHM3lyqi0bEeaBZho8UD328oFsmsisyJ',
@@ -492,7 +562,7 @@ describe('GoogleClient tests', () => {
         })
         .get('/drive/v3/files/1vjng4ahZWph-9oeaMae16P9Kbb3xg4Cg')
         .query({
-          fields: 'name,parents,modifiedTime',
+          fields: 'name,parents,mimeType,modifiedTime',
         })
         .reply(200, {
           id: '1vjng4ahZWph-9oeaMae16P9Kbb3xg4Cg',
@@ -534,7 +604,7 @@ describe('GoogleClient tests', () => {
       nock('https://www.googleapis.com')
         .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP')
         .query({
-          fields: 'name,parents,modifiedTime',
+          fields: 'name,parents,mimeType,modifiedTime',
         })
         .reply(404);
 
