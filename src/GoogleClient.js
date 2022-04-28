@@ -236,6 +236,7 @@ export class GoogleClient {
       name,
       path: itemPath,
       id: item.id,
+      mimeType: item.mimeType,
     }, item);
 
     if (children.length) {
@@ -292,6 +293,7 @@ export class GoogleClient {
       name: '',
       path: '/',
       id: parentId,
+      mimeType: 'application/vnd.google-apps.folder',
     }];
   }
 
