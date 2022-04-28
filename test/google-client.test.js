@@ -18,7 +18,7 @@ import { Nock } from './utils.js';
 
 describe('GoogleClient tests', () => {
   const DEFAULT_LIST_OPTS = {
-    fields: 'nextPageToken, files(id, name, modifiedTime)',
+    fields: 'nextPageToken, files(id, name, mimeType, modifiedTime)',
     pageSize: 1000,
     includeItemsFromAllDrives: 'true',
     supportsAllDrives: 'true',
