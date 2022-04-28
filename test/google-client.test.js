@@ -366,6 +366,45 @@ describe('GoogleClient tests', () => {
       });
     });
 
+    it('getItemFromPath returns item for no path is cached can be invalidated', async () => {
+      nock.loginGoogle(2);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP')
+        .twice()
+        .query({
+          fields: 'name,parents,mimeType,modifiedTime',
+        })
+        .reply(200, {
+          id: '1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys',
+          name: 'helix-hackathon-part-v',
+          modifiedTime: 'Mon, 14 Jun 2021 03:37:28 GMT',
+          parents: [
+            '1BHM3lyqi0bEeaBZho8UD328oFsmsisyJ',
+          ],
+        });
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      const item = await client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP');
+      assert.deepStrictEqual(item, {
+        id: '1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP',
+        lastModified: 1623641848000,
+        path: '/helix-hackathon-part-v',
+      });
+      const item1 = await client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP');
+      assert.strictEqual(item, item1);
+
+      item.invalidate();
+      const item2 = await client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP');
+      assert.deepStrictEqual(item, item2);
+      assert.notStrictEqual(item, item2);
+    });
+
     it('getItemFromPath returns null for no path and not found', async () => {
       nock.loginGoogle(1);
       nock('https://www.googleapis.com')

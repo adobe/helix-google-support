@@ -25,18 +25,24 @@ let lru = new LRU({ max: 1000, ttl: 60000 });
  * @property {string} name
  * @property {string} url
  * @property {string} path
+ * @property {string} mimeType
+ * @property {number} lastModified
  */
 
 /**
- * Adds the last modified property if defined in item
+ * Adds the last modified property and mimeType if defined in item
  * @param {DriveItemInfo} itemInfo
  * @param item
  * @returns {DriveItemInfo}
  */
-function addLastModified(itemInfo, item) {
+function addFields(itemInfo, item) {
   if (item.modifiedTime) {
     // eslint-disable-next-line no-param-reassign
     itemInfo.lastModified = Date.parse(item.modifiedTime);
+  }
+  if (item.mimeType) {
+    // eslint-disable-next-line no-param-reassign
+    itemInfo.mimeType = item.mimeType;
   }
   return itemInfo;
 }
@@ -232,11 +238,10 @@ export class GoogleClient {
     if (!children) {
       return null;
     }
-    const pathItem = addLastModified({
+    const pathItem = addFields({
       name,
       path: itemPath,
       id: item.id,
-      mimeType: item.mimeType,
     }, item);
 
     if (children.length) {
@@ -320,7 +325,7 @@ export class GoogleClient {
     const root = roots[fileId];
     if (root) {
       // stop at mount root
-      return [addLastModified({
+      return [addFields({
         id: fileId,
         name: '',
         path: root,
@@ -330,7 +335,7 @@ export class GoogleClient {
     const parentId = data.parents ? data.parents[0] : '';
     if (!parentId) {
       // outside mountpoint
-      return [addLastModified({
+      return [addFields({
         id: fileId,
         name: data.name,
         path: `/root:/${data.name}`,
@@ -339,7 +344,7 @@ export class GoogleClient {
 
     const ancestors = await this.getItems(data.parents[0], roots);
     const parentPath = ancestors[0].path.replace(/\/+$/, '');
-    ancestors.unshift(addLastModified({
+    ancestors.unshift(addFields({
       id: fileId,
       name: data.name,
       path: `${parentPath}/${data.name}`,
@@ -370,27 +375,38 @@ export class GoogleClient {
    * Returns the (cached) item for the given path or {@code null} if the item cannot be found.
    * The item will contains a `invalidate()` method which can be used to remove it from the cache.
    *
-   * @param {string} parentId
-   * @param {string} path
+   * @param {string} parentId the parent id or the id of the item itself, if the path is missing
+   * @param {string} [path]
    * @returns {Promise<DriveItemInfo>}
    */
   async getItemFromPath(parentId, path) {
     if (!path) {
       try {
-        const { data } = (await this.drive.files.get({
-          fileId: parentId,
-          fields: [
-            'name',
-            'parents',
-            'mimeType',
-            'modifiedTime',
-          ].join(','),
-        }));
-
-        return addLastModified({
-          id: parentId,
-          path: `/${data.name}`,
-        }, data);
+        let item = lru.get(parentId);
+        if (!item) {
+          const { data } = (await this.drive.files.get({
+            fileId: parentId,
+            fields: [
+              'name',
+              'parents',
+              'mimeType',
+              'modifiedTime',
+            ].join(','),
+          }));
+          item = addFields({
+            id: parentId,
+            path: `/${data.name}`,
+          }, data);
+          // todo: extend caching to all items ?
+          Object.defineProperty(item, 'invalidate', {
+            enumerable: false,
+            value() {
+              lru.delete(parentId);
+            },
+          });
+          lru.set(parentId, item);
+        }
+        return item;
       } catch (e) {
         if (e.response && e.response.status === 404) {
           return null;
