@@ -239,6 +239,7 @@ export class GoogleClient {
     }, item);
 
     if (children.length) {
+      // add parent references not-enumerable to avoid deep structures during serialization
       Object.defineProperty(children[children.length - 1], 'parent', {
         enumerable: false,
         value: pathItem,
@@ -263,14 +264,12 @@ export class GoogleClient {
     items = await this.getUncachedItemsFromSegments(pathSegments, parentId, parentPath);
     if (items) {
       lru.set(key, items);
-      const last = items[items.length - 1];
+      // add invalidation function as not-enumerable to keep compatible objects
       Object.defineProperty(items[items.length - 1], 'invalidate', {
         enumerable: false,
         value() {
           lru.delete(key);
-          if (last.parent) {
-            last.parent.invalidate();
-          }
+          this.parent?.invalidate();
         },
       });
     }
