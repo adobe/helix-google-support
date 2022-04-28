@@ -200,6 +200,137 @@ describe('GoogleClient tests', () => {
     });
   });
 
+  describe('getItemFromPath tests', () => {
+    it('getItemFromPath returns item', async () => {
+      nock.loginGoogle(8);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files')
+        .twice() // second time after item was removed from the cache
+        .query({
+          q: '\'1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP\' in parents and trashed=false and mimeType = \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.folder',
+            name: 'deeply',
+            id: 123,
+          }],
+        })
+        .get('/drive/v3/files')
+        .twice() // second time after item was removed from the cache
+        .query({
+          q: '\'123\' in parents and trashed=false and mimeType = \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.folder',
+            name: 'nested',
+            id: 124,
+          }, {
+            mimeType: 'application/vnd.google-apps.folder',
+            name: 'other',
+            id: 125,
+          }],
+        })
+        .get('/drive/v3/files')
+        .twice() // second time after item was removed from the cache
+        .query({
+          q: '\'124\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.sheets',
+            name: 'structure',
+            id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUw',
+            modifiedTime: 'Sat, 15 Feb 2031 06:59:41 GMT',
+          }],
+          nextPageToken: 'fake-next-token',
+        })
+        .get('/drive/v3/files')
+        .twice() // second time after item was removed from the cache
+        .query({
+          q: '\'124\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+          pageToken: 'fake-next-token',
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.sheets',
+            name: 'Structure',
+            id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUx',
+          }],
+        });
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      const item = await client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP', '/deeply/nested/structure');
+      const {
+        lastModified,
+        ...actual
+      } = item;
+      assert.ok(lastModified);
+      assert.deepStrictEqual(actual, {
+        id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUw',
+        name: 'structure',
+        path: '/deeply/nested/structure',
+      });
+
+      // fetch again (from cache)
+      const item2 = await client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP', '/deeply/nested/structure');
+      assert.strictEqual(item, item2);
+
+      // invalidate
+      item.invalidate();
+
+      const item3 = await client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP', '/deeply/nested/structure');
+      assert.deepEqual(item, item3);
+      assert.notStrictEqual(item, item3);
+    });
+
+    it('getItemFromPath return null for not existing', async () => {
+      nock.loginGoogle(2);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP\' in parents and trashed=false and mimeType = \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.folder',
+            name: 'deeply',
+            id: 123,
+          }],
+        })
+        .get('/drive/v3/files')
+        .query({
+          q: '\'123\' in parents and trashed=false and mimeType = \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [],
+        });
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      const item = await client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP', '/deeply/nested/missing');
+      assert.deepStrictEqual(item, null);
+    });
+  });
+
   it('generateAuthUrl correctly', async () => {
     const client = await new GoogleClient({
       log: console,
