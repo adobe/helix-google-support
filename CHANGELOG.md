@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/adobe/helix-google-support/compare/v1.1.0...v1.2.0) (2022-04-28)
+
+
+### Features
+
+* add get file|doc from path ([#9](https://github.com/adobe/helix-google-support/issues/9)) ([4a2e927](https://github.com/adobe/helix-google-support/commit/4a2e9272f4328e936e65b7144d04e516ac602625))
+
 # [1.1.0](https://github.com/adobe/helix-google-support/compare/v1.0.1...v1.1.0) (2022-04-28)
 
 
