@@ -372,7 +372,7 @@ export class GoogleClient {
    */
   async getItemFromPath(rootId, path) {
     const segs = createPathSegments(path);
-    const items = await this.getDriveItemsFromSegments([...segs], rootId, '');
+    const items = await this.getDriveItemsFromSegments(segs, rootId, '');
     const item = items?.[0];
     if (!item) {
       return null;
