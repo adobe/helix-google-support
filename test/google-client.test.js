@@ -123,7 +123,7 @@ describe('GoogleClient tests', () => {
         cachePlugin,
       }).init();
 
-      const hierarchy = await client.getItemsFromPath('/deeply/nested/structure', '1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP');
+      const hierarchy = await client.getItemsFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP', '/deeply/nested/structure');
       assert.deepStrictEqual(hierarchy, [
         {
           id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUw',
@@ -180,7 +180,7 @@ describe('GoogleClient tests', () => {
         cachePlugin,
       }).init();
 
-      const hierarchy = await client.getItemsFromPath('/deeply/nested/missing', '1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP');
+      const hierarchy = await client.getItemsFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP', '/deeply/nested/missing');
       assert.deepStrictEqual(hierarchy, []);
     });
 
@@ -196,7 +196,7 @@ describe('GoogleClient tests', () => {
         cachePlugin,
       }).init();
 
-      await assert.rejects(client.getItemsFromPath('/deeply/nested/missing', '1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP'), new Error('Could not refresh access token: rate limit exceeded.'));
+      await assert.rejects(client.getItemsFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP', '/deeply/nested/missing'), new Error('Could not refresh access token: rate limit exceeded.'));
     });
   });
 
@@ -605,6 +605,332 @@ describe('GoogleClient tests', () => {
       }).init();
 
       await assert.rejects(client.getFile('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP'), new Error('Could not refresh access token: rate limit exceeded.'));
+    });
+  });
+
+  describe('getFileFromPath tests', () => {
+    it('getFileFromPath returns file', async () => {
+      nock.loginGoogle(2);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.document',
+            name: 'document1',
+            id: '1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP',
+          }],
+        });
+
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP?alt=media')
+        .reply(200, 'hello');
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      assert.strictEqual(await client.getFileFromPath('1', '/document1'), 'hello');
+    });
+
+    it('getFileFromPath returns null if not found', async () => {
+      nock.loginGoogle(1);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [],
+        });
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      assert.strictEqual(await client.getFileFromPath('1', '/document1'), null);
+    });
+
+    it('getFileFromPath re-fetches the file if not found', async () => {
+      nock.loginGoogle(4);
+      nock('https://www.googleapis.com')
+        // first time for the cache
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.document',
+            name: 'document1',
+            id: 'oldid',
+          }],
+        })
+        // 2nd time with correct ID
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.document',
+            name: 'document1',
+            id: 'newid',
+          }],
+        });
+
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files/oldid?alt=media')
+        .reply(404)
+        .get('/drive/v3/files/newid?alt=media')
+        .reply(200, 'hello');
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      await client.getItemsFromPath('1', '/document1'); // fill the cache
+      assert.strictEqual(await client.getFileFromPath('1', '/document1'), 'hello');
+    });
+
+    it('getFileFromPath guards against endless recursion', async () => {
+      nock.loginGoogle(4);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files')
+        .twice()
+        .query({
+          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.document',
+            name: 'document1',
+            id: 'oldid',
+          }],
+        });
+
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files/oldid?alt=media')
+        .twice()
+        .reply(404);
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      assert.strictEqual(await client.getFileFromPath('1', '/document1'), null);
+    });
+
+    it('getFileFromPath handles errors', async () => {
+      nock.loginGoogle(2);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.document',
+            name: 'document1',
+            id: 'oldid',
+          }],
+        });
+
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files/oldid?alt=media')
+        .reply(401);
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      await assert.rejects(client.getFileFromPath('1', '/document1'), new Error(''));
+    });
+  });
+
+  describe('getDocumentFromPath tests', () => {
+    it('getDocumentFromPath returns document', async () => {
+      nock.loginGoogle(2);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.document',
+            name: 'document1',
+            id: '1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP',
+          }],
+        });
+
+      nock('https://docs.googleapis.com')
+        .get('/v1/documents/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP')
+        .reply(200, 'hello');
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      assert.strictEqual(await client.getDocumentFromPath('1', '/document1'), 'hello');
+    });
+
+    it('getDocumentFromPath returns null if not found', async () => {
+      nock.loginGoogle(1);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [],
+        });
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      assert.strictEqual(await client.getDocumentFromPath('1', '/document1'), null);
+    });
+
+    it('getDocumentFromPath re-fetches the file if not found', async () => {
+      nock.loginGoogle(4);
+      nock('https://www.googleapis.com')
+        // first time for the cache
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.document',
+            name: 'document1',
+            id: 'oldid',
+          }],
+        })
+        // 2nd time with correct ID
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.document',
+            name: 'document1',
+            id: 'newid',
+          }],
+        });
+
+      nock('https://docs.googleapis.com')
+        .get('/v1/documents/oldid')
+        .reply(404)
+        .get('/v1/documents/newid')
+        .reply(200, 'hello');
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      await client.getItemsFromPath('1', '/document1'); // fill the cache
+      assert.strictEqual(await client.getDocumentFromPath('1', '/document1'), 'hello');
+    });
+
+    it('getDocumentFromPath guards against endless recursion', async () => {
+      nock.loginGoogle(4);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files')
+        .twice()
+        .query({
+          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.document',
+            name: 'document1',
+            id: 'oldid',
+          }],
+        });
+
+      nock('https://docs.googleapis.com')
+        .get('/v1/documents/oldid')
+        .twice()
+        .reply(404);
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      assert.strictEqual(await client.getDocumentFromPath('1', '/document1'), null);
+    });
+
+    it('getDocumentFromPath handles errors', async () => {
+      nock.loginGoogle(2);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.document',
+            name: 'document1',
+            id: 'oldid',
+          }],
+        });
+
+      nock('https://docs.googleapis.com')
+        .get('/v1/documents/oldid')
+        .reply(401);
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      await assert.rejects(client.getDocumentFromPath('1', '/document1'), new Error(''));
     });
   });
 

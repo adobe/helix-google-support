@@ -150,12 +150,12 @@ export class GoogleClient {
   }
 
   /**
-   * @param {string[]} pathSegments
    * @param {string} parentId
+   * @param {string[]} pathSegments
    * @param {string} parentPath
    * @returns {Promise<DriveItemInfo[]>|null}
    */
-  async getUncachedItemsFromSegments(pathSegments, parentId, parentPath) {
+  async getUncachedItemsFromSegments(parentId, pathSegments, parentPath) {
     const { log, drive } = this;
     const name = pathSegments.shift();
     const [baseName, ext] = splitByExtension(name);
@@ -226,7 +226,7 @@ export class GoogleClient {
     const itemPath = `${parentPath}/${sanitizedName}`;
     const children = pathSegments.length
       // eslint-disable-next-line no-use-before-define
-      ? await this.getDriveItemsFromSegments(pathSegments, item.id, itemPath)
+      ? await this.getDriveItemsFromSegments(item.id, pathSegments, itemPath)
       : [];
 
     if (!children) {
@@ -250,18 +250,18 @@ export class GoogleClient {
   }
 
   /**
-   * @param {string} pathSegments
    * @param {string} parentId
+   * @param {string} pathSegments
    * @param {string} parentPath
    * @returns {Promise<DriveItemInfo[]>|null}
    */
-  async getDriveItemsFromSegments(pathSegments, parentId, parentPath) {
+  async getDriveItemsFromSegments(parentId, pathSegments, parentPath) {
     const key = getCacheKey(parentId, pathSegments);
     let items = lru.get(key);
     if (items) {
       return items;
     }
-    items = await this.getUncachedItemsFromSegments(pathSegments, parentId, parentPath);
+    items = await this.getUncachedItemsFromSegments(parentId, pathSegments, parentPath);
     if (items) {
       lru.set(key, items);
       // add invalidation function as not-enumerable to keep compatible objects
@@ -278,20 +278,20 @@ export class GoogleClient {
 
   /**
    * returns the items hierarchy for the given path and root id, starting with the given path.
-   * @param path
-   * @param rootId
+   * @param {string} parentId
+   * @param {string} path
    * @return {DriveItemInfo[]}
    */
-  async getItemsFromPath(path, rootId) {
+  async getItemsFromPath(parentId, path) {
     const segs = createPathSegments(path);
-    const result = await this.getDriveItemsFromSegments(segs, rootId, '');
+    const result = await this.getDriveItemsFromSegments(parentId, segs, '');
     if (!result) {
       return [];
     }
     return [...result, {
       name: '',
       path: '/',
-      id: rootId,
+      id: parentId,
     }];
   }
 
@@ -299,6 +299,7 @@ export class GoogleClient {
    * returns the items hierarchy for the given item, starting with the given id
    * @param {string} fileId
    * @param {object} roots
+   * @private
    * @returns {Promise<DriveItemInfo[]>}
    */
   async getItems(fileId, roots) {
@@ -366,13 +367,13 @@ export class GoogleClient {
    * Returns the (cached) item for the given path or {@code null} if the item cannot be found.
    * The item will contains a `invalidate()` method which can be used to remove it from the cache.
    *
-   * @param {string} rootId
+   * @param {string} parentId
    * @param {string} path
    * @returns {Promise<DriveItemInfo>}
    */
-  async getItemFromPath(rootId, path) {
+  async getItemFromPath(parentId, path) {
     const segs = createPathSegments(path);
-    const items = await this.getDriveItemsFromSegments(segs, rootId, '');
+    const items = await this.getDriveItemsFromSegments(parentId, segs, '');
     const item = items?.[0];
     if (!item) {
       return null;
@@ -401,6 +402,37 @@ export class GoogleClient {
   }
 
   /**
+   * Fetches the file data from the give path. If the file with the internal id could not be
+   * fetched, the item cache is invalidated and the operation is retried. this is to support
+   * moved items.
+   * @param {string} parentId
+   * @param {string} path
+   * @param {boolean} noRetry {@code true} to avoid retry
+   * @returns {Promise<string>|null} The data of the file or {@code null} if the file does not exist
+   */
+  async getFileFromPath(parentId, path, noRetry) {
+    const item = await this.getItemFromPath(parentId, path);
+    if (!item) {
+      return null;
+    }
+    try {
+      // noinspection ES6RedundantAwait (need to catch exception)
+      return await this.getFile(item.id);
+    } catch (e) {
+      if (e.statusCode === 404) {
+        if (noRetry) {
+          return null;
+        }
+        this.log.info(`file ${item.id} does not exist - invalidating cache and retry`);
+        item.invalidate();
+        return this.getFileFromPath(parentId, path, true);
+      } else {
+        throw e;
+      }
+    }
+  }
+
+  /**
    * Returns an (uncached) document directly via the google api
    * @param {string} documentId
    * @returns {object} document
@@ -418,6 +450,37 @@ export class GoogleClient {
         throw new StatusCodeError(`Not Found: ${documentId}`, 404);
       }
       throw e;
+    }
+  }
+
+  /**
+   * Fetches the document from the give path. If the document with the internal id could not be
+   * fetched, the item cache is invalidated and the operation is retried. this is to support
+   * moved items.
+   * @param {string} parentId
+   * @param {string} path
+   * @param {boolean} noRetry {@code true} to avoid retry
+   * @returns {Promise<object>|null} The document or {@code null} if the document does not exist
+   */
+  async getDocumentFromPath(parentId, path, noRetry) {
+    const item = await this.getItemFromPath(parentId, path);
+    if (!item) {
+      return null;
+    }
+    try {
+      // noinspection ES6RedundantAwait (need to catch exception)
+      return await this.getDocument(item.id);
+    } catch (e) {
+      if (e.statusCode === 404) {
+        if (noRetry) {
+          return null;
+        }
+        this.log.info(`document ${item.id} does not exist - invalidating cache and retry`);
+        item.invalidate();
+        return this.getDocumentFromPath(parentId, path, true);
+      } else {
+        throw e;
+      }
     }
   }
 }
