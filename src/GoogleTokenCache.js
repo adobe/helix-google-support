@@ -40,12 +40,25 @@ export class GoogleTokenCache {
     this.tokens = JSON.parse(str);
   }
 
+  logTokens(msg) {
+    const {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expiry_date: expiryDate,
+    } = this.tokens;
+    const exp = expiryDate ? new Date(expiryDate).toISOString() : '?';
+    this.log.info(`${msg}: access_token=${accessToken ? '***' : '?'} refresh_token=${refreshToken ? '***' : '?'} expires=${exp}`);
+  }
+
   async load() {
-    return this.plugin.beforeCacheAccess(this.context);
+    const ret = await this.plugin.beforeCacheAccess(this.context);
+    this.logTokens('GoogleTokenCache loaded');
+    return ret;
   }
 
   async store(tokens) {
     this.tokens = tokens;
+    this.logTokens('GoogleTokenCache stored');
     this.context.cacheHasChanged = true;
     try {
       await this.plugin.afterCacheAccess(this.context);
