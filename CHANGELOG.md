@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/adobe/helix-google-support/compare/v1.4.0...v1.4.1) (2022-05-04)
+
+
+### Bug Fixes
+
+* save refresh token ([#19](https://github.com/adobe/helix-google-support/issues/19)) ([f3fea7b](https://github.com/adobe/helix-google-support/commit/f3fea7ba0d868fd96288579463c842410b956dd5))
+
 # [1.4.0](https://github.com/adobe/helix-google-support/compare/v1.3.4...v1.4.0) (2022-05-04)
 
 
