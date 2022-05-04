@@ -41,7 +41,7 @@ describe('GoogleClient tests', () => {
       scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/documents openid',
       token_type: 'Bearer',
       id_token: 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImYxMzM4Y2EyNjgzNTg2M2Y2NzE0MDhmNDE3MzhhN2I0OWU3NDBmYzAiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI1ODMyMjk4MjM4ODktaTJuc3Y2YTU2NWw0cmpvYnNtNjUxNm91YzQwYXJyZXUuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI1ODMyMjk4MjM4ODktaTJuc3Y2YTU2NWw0cmpvYnNtNjUxNm91YzQwYXJyZXUuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDczMjczNjE1MDM5NzI2OTA3OTIiLCJoZCI6ImFkb2JlLmNvbSIsImVtYWlsIjoidHJpcG9kQGFkb2JlLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJhdF9oYXNoIjoiUVpEd1doNVF4MzdTS0hCb3JzcGQ5ZyIsIm5hbWUiOiJUb2JpYXMgQm9jYW5lZ3JhIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FBVFhBSnp4VFRZSFBQRkJuZ0FXSHg1U2VEZ1Z2YjdDREliOXNHZjk2YXVYPXM5Ni1jIiwiZ2l2ZW5fbmFtZSI6IlRvYmlhcyIsImZhbWlseV9uYW1lIjoiQm9jYW5lZ3JhIiwibG9jYWxlIjoiZW4iLCJpYXQiOjE2NDk2ODkxNDUsImV4cCI6MTY0OTY5Mjc0NX0.XD4BHQjsPxeifGluWm4xn24yRTnPr4oZYsOCwpDO2hdUan2RxIHWJJrGuFhi_11p-Cq249mwsYKoNvsOhML27Wp-MQ2vx0t192em7GrnmlNhiwpTQq0lmtYFSyPnjmrurMnDW45bSJn43jEBq_kfv_BBefI82mBpQOIeEXQKsEAUO-RQCvv6herfwOomSmTmdhqxbeP-otabUSFhjIGvFGel2vulDlqs4wFQjs8puIkEIElaqpzlceBGwhd74e8nb3pm3Zt83Kr96l16gosaXfqEIkPAvkU6vjxNVbsk4oQnV14AEkR8zAiE02dZTusZv7MrMDwe3SSyOKoJGMSxFQ',
-      expiry_date: 1649692744109,
+      expiry_date: Date.now() + 60 * 1000,
     }));
   });
 
@@ -471,7 +471,11 @@ describe('GoogleClient tests', () => {
           grant_type: 'authorization_code',
           code_verifier: '',
         });
-        return [200, { refresh_token: 'dummy', expiry_date: 1651662977126 }];
+        return [200, {
+          access_token: 'dummy-access',
+          refresh_token: 'dummy-refresh',
+          expiry_date: 1651662977126,
+        }];
       });
 
     const client = await new GoogleClient({
@@ -483,10 +487,57 @@ describe('GoogleClient tests', () => {
     }).init();
 
     assert.deepStrictEqual(await client.getToken('1234'), {
-      refresh_token: 'dummy',
+      refresh_token: 'dummy-refresh',
+      access_token: 'dummy-access',
       expiry_date: 1651662977126,
     });
-    assert.strictEqual(cachePlugin.caches.get('foobar'), '{"refresh_token":"dummy","expiry_date":1651662977126}');
+    assert.deepStrictEqual(JSON.parse(cachePlugin.caches.get('foobar')), {
+      refresh_token: 'dummy-refresh',
+      access_token: 'dummy-access',
+      expiry_date: 1651662977126,
+    });
+  });
+
+  it('token is refreshed', async () => {
+    const nowOld = Date.now() - 60 * 1000;
+    const nowNew = Date.now() + 60 * 1000;
+
+    nock('https://oauth2.googleapis.com')
+      .post('/token')
+      .reply((uri, body) => {
+        assert.deepStrictEqual({ ...decode(body) }, {
+          client_id: 'fake',
+          client_secret: 'fake',
+          grant_type: 'refresh_token',
+          refresh_token: 'dummy-refresh',
+        });
+        return [200, {
+          access_token: 'dummy-access-new',
+          expiry_date: nowNew,
+        }];
+      });
+
+    cachePlugin.caches.set('foobar', JSON.stringify({
+      access_token: 'dummy-access-old',
+      refresh_token: 'dummy-refresh',
+      expiry_date: nowOld,
+    }));
+
+    const client = await new GoogleClient({
+      log: console,
+      clientId: 'fake',
+      clientSecret: 'fake',
+      cachePlugin,
+      redirectUri: 'https://localhost:8000',
+    }).init();
+
+    const { token } = await client.auth.getAccessToken();
+    assert.deepStrictEqual(token, 'dummy-access-new');
+    assert.deepStrictEqual(JSON.parse(cachePlugin.caches.get('foobar')), {
+      refresh_token: 'dummy-refresh',
+      access_token: 'dummy-access-new',
+      expiry_date: nowNew,
+    });
   });
 
   it('setCredentials are cached', async () => {
