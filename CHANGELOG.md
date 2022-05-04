@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/adobe/helix-google-support/compare/v1.3.4...v1.4.0) (2022-05-04)
+
+
+### Features
+
+* log token cache operations ([#18](https://github.com/adobe/helix-google-support/issues/18)) ([8ceb35d](https://github.com/adobe/helix-google-support/commit/8ceb35db0856da3c28992fb435e6409341775456))
+
 ## [1.3.4](https://github.com/adobe/helix-google-support/compare/v1.3.3...v1.3.4) (2022-05-04)
 
 
