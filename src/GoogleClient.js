@@ -107,7 +107,10 @@ export class GoogleClient {
       const originalRefreshTokenNoCache = this.auth.refreshTokenNoCache.bind(this.auth);
       this.auth.refreshTokenNoCache = async (...args) => {
         const ret = await originalRefreshTokenNoCache(...args);
-        await this.cache.store(ret.tokens);
+        await this.cache.store({
+          refresh_token: this.auth.credentials.refresh_token,
+          ...ret.tokens,
+        });
         return ret;
       };
     }
