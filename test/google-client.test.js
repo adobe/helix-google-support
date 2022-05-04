@@ -471,7 +471,7 @@ describe('GoogleClient tests', () => {
           grant_type: 'authorization_code',
           code_verifier: '',
         });
-        return [200, { refresh_token: 'dummy' }];
+        return [200, { refresh_token: 'dummy', expiry_date: 1651662977126 }];
       });
 
     const client = await new GoogleClient({
@@ -484,8 +484,9 @@ describe('GoogleClient tests', () => {
 
     assert.deepStrictEqual(await client.getToken('1234'), {
       refresh_token: 'dummy',
+      expiry_date: 1651662977126,
     });
-    assert.strictEqual(cachePlugin.caches.get('foobar'), '{"refresh_token":"dummy"}');
+    assert.strictEqual(cachePlugin.caches.get('foobar'), '{"refresh_token":"dummy","expiry_date":1651662977126}');
   });
 
   it('setCredentials are cached', async () => {
@@ -498,9 +499,9 @@ describe('GoogleClient tests', () => {
     }).init();
 
     client.setCredentials({
-      refresh_token: 'dummy',
+      access_token: 'dummy',
     });
-    assert.strictEqual(cachePlugin.caches.get('foobar'), '{"refresh_token":"dummy"}');
+    assert.strictEqual(cachePlugin.caches.get('foobar'), '{"access_token":"dummy"}');
   });
 
   describe('getItemsFromId tests', () => {
