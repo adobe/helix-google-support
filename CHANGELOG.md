@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/adobe/helix-google-support/compare/v1.4.19...v1.5.0) (2022-07-12)
+
+
+### Features
+
+* allow to specify mimetype ([cb5059d](https://github.com/adobe/helix-google-support/commit/cb5059d9dc575b3f26b73191f4a4bb8bd8b02fce)), closes [#47](https://github.com/adobe/helix-google-support/issues/47)
+
 ## [1.4.19](https://github.com/adobe/helix-google-support/compare/v1.4.18...v1.4.19) (2022-07-09)
 
 
