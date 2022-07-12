@@ -26,6 +26,18 @@ declare interface GoogleClientOptions {
  */
 declare class GoogleClient {
   /**
+   * Mimetype for documents
+   * @value 'application/vnd.google-apps.document'
+   */
+  static TYPE_DOCUMENT:string;
+
+  /**
+   * Mimetype for spreadsheet
+   * @value 'application/vnd.google-apps.spreadsheet'
+   */
+  static TYPE_SPREADSHEET:string;
+
+  /**
    * Sets the global item cache options. It internally creates a new LRU
    * with the given options
    *
@@ -64,25 +76,28 @@ declare class GoogleClient {
    * @param {string} parentId
    * @param {string[]} pathSegments
    * @param {string} parentPath
+   * @param {string} [type] optional file mimetype filter.
    * @returns {Promise<DriveItemInfo[]>|null}
    */
-  getUncachedItemsFromSegments(parentId:string, pathSegments:string[], parentPath:string):Promise<DriveItemInfo[]>;
+  getUncachedItemsFromSegments(parentId:string, pathSegments:string[], parentPath:string, type?:string):Promise<DriveItemInfo[]>;
 
   /**
    * @param {string} parentId
    * @param {string} pathSegments
    * @param {string} parentPath
+   * @param {string} [type] optional file mimetype filter.
    * @returns {Promise<DriveItemInfo[]>|null}
    */
-  getDriveItemsFromSegments(parentId:string, pathSegments:string[], parentPath:string):Promise<DriveItemInfo[]>;
+  getDriveItemsFromSegments(parentId:string, pathSegments:string[], parentPath:string, type?:string):Promise<DriveItemInfo[]>;
 
   /**
    * returns the items hierarchy for the given path and root id, starting with the given path.
    * @param {string} parentId
    * @param {string} path
+   * @param {string} [type] optional file mimetype filter.
    * @return {DriveItemInfo[]}
    */
-  getDriveItemsFromSegments(parentId:string, path:string):Promise<DriveItemInfo[]>;
+  getDriveItemsFromSegments(parentId:string, path:string, type?:string):Promise<DriveItemInfo[]>;
 
   /**
    * returns the items hierarchy for the given item, starting with the given id
@@ -98,9 +113,10 @@ declare class GoogleClient {
    *
    * @param {string} parentId
    * @param {string} path
+   * @param {string} [type] optional file mimetype filter.
    * @returns {Promise<DriveItemInfo>}
    */
-  getItemFromPath(parentId:string, path:string):Promise<DriveItemInfo>;
+  getItemFromPath(parentId:string, path:string, type?:string):Promise<DriveItemInfo>;
 
   /**
    * Returns an (uncached) file directly via the google api
@@ -116,12 +132,13 @@ declare class GoogleClient {
    * @param {string} parentId
    * @param {string} path
    * @param {boolean} noRetry {@code true} to avoid retry
+   * @param {string} [type] optional file mimetype filter.
    * @returns {Promise<string>|null} The data of the file or {@code null} if the file does not exist
    */
-  getFileFromPath(parentId:string, path:string, noRetry:boolean):Promise<string>;
+  getFileFromPath(parentId:string, path:string, noRetry:boolean, type?:string):Promise<string>;
 
   /**
-   * Returns an (uncached) document directly via the google api
+   * Returns an (uncached) document directly via the google docs api
    * @param {string} documentId
    * @returns {object} document
    */

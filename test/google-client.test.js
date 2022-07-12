@@ -943,7 +943,7 @@ describe('GoogleClient tests', () => {
       nock('https://www.googleapis.com')
         .get('/drive/v3/files')
         .query({
-          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          q: '\'1\' in parents and trashed=false and mimeType = \'application/vnd.google-apps.document\'',
           ...DEFAULT_LIST_OPTS,
         })
         .reply(200, {
@@ -973,7 +973,7 @@ describe('GoogleClient tests', () => {
       nock('https://www.googleapis.com')
         .get('/drive/v3/files')
         .query({
-          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          q: '\'1\' in parents and trashed=false and mimeType = \'application/vnd.google-apps.document\'',
           ...DEFAULT_LIST_OPTS,
         })
         .reply(200, {
@@ -996,7 +996,7 @@ describe('GoogleClient tests', () => {
         // first time for the cache
         .get('/drive/v3/files')
         .query({
-          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          q: '\'1\' in parents and trashed=false and mimeType = \'application/vnd.google-apps.document\'',
           ...DEFAULT_LIST_OPTS,
         })
         .reply(200, {
@@ -1009,7 +1009,7 @@ describe('GoogleClient tests', () => {
         // 2nd time with correct ID
         .get('/drive/v3/files')
         .query({
-          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          q: '\'1\' in parents and trashed=false and mimeType = \'application/vnd.google-apps.document\'',
           ...DEFAULT_LIST_OPTS,
         })
         .reply(200, {
@@ -1033,7 +1033,7 @@ describe('GoogleClient tests', () => {
         cachePlugin,
       }).init();
 
-      await client.getItemsFromPath('1', '/document1'); // fill the cache
+      await client.getItemsFromPath('1', '/document1', GoogleClient.TYPE_DOCUMENT); // fill the cache
       assert.strictEqual(await client.getDocumentFromPath('1', '/document1'), 'hello');
     });
 
@@ -1043,7 +1043,7 @@ describe('GoogleClient tests', () => {
         .get('/drive/v3/files')
         .twice()
         .query({
-          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          q: '\'1\' in parents and trashed=false and mimeType = \'application/vnd.google-apps.document\'',
           ...DEFAULT_LIST_OPTS,
         })
         .reply(200, {
@@ -1074,7 +1074,7 @@ describe('GoogleClient tests', () => {
       nock('https://www.googleapis.com')
         .get('/drive/v3/files')
         .query({
-          q: '\'1\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          q: '\'1\' in parents and trashed=false and mimeType = \'application/vnd.google-apps.document\'',
           ...DEFAULT_LIST_OPTS,
         })
         .reply(200, {
