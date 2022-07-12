@@ -56,8 +56,8 @@ function createPathSegments(path) {
   return pathSegments;
 }
 
-function getCacheKey(parentId, pathSegments) {
-  return `${parentId}:${pathSegments.join('/')}`;
+function getCacheKey(parentId, pathSegments, type = 'file') {
+  return `${parentId}:${pathSegments.join('/')}:${type}`;
 }
 
 /**
@@ -162,21 +162,31 @@ export class GoogleClient {
    * @param {string} parentId
    * @param {string[]} pathSegments
    * @param {string} parentPath
+   * @param {string} [type] optional file mimetype
    * @returns {Promise<DriveItemInfo[]>|null}
    */
-  async getUncachedItemsFromSegments(parentId, pathSegments, parentPath) {
+  async getUncachedItemsFromSegments(parentId, pathSegments, parentPath, type) {
     const { log, drive } = this;
     const name = pathSegments.shift();
     const [baseName, ext] = splitByExtension(name);
     const sanitizedName = sanitizeName(baseName);
 
     const items = [];
+    let mimeTypeFilter;
+    // filter for folder if path continues
+    if (pathSegments.length) {
+      mimeTypeFilter = 'and mimeType = \'application/vnd.google-apps.folder\'';
+    } else {
+      mimeTypeFilter = type
+        ? `and mimeType = '${type}'`
+        : 'and mimeType != \'application/vnd.google-apps.folder\'';
+    }
+
     const opts = {
       q: [
         `'${parentId}' in parents`,
         'and trashed=false',
-        // folder if path continues, sheet otherwise
-        `and mimeType ${pathSegments.length ? '=' : '!='} 'application/vnd.google-apps.folder'`,
+        mimeTypeFilter,
       ].join(' '),
       fields: 'nextPageToken, files(id, name, mimeType, modifiedTime)',
       includeItemsFromAllDrives: true,
@@ -235,7 +245,7 @@ export class GoogleClient {
     const itemPath = `${parentPath}/${sanitizedName}`;
     const children = pathSegments.length
       // eslint-disable-next-line no-use-before-define
-      ? await this.getDriveItemsFromSegments(item.id, pathSegments, itemPath)
+      ? await this.getDriveItemsFromSegments(item.id, pathSegments, itemPath, type)
       : [];
 
     if (!children) {
@@ -262,15 +272,16 @@ export class GoogleClient {
    * @param {string} parentId
    * @param {string} pathSegments
    * @param {string} parentPath
+   * @param {string} [type] optional file mimetype
    * @returns {Promise<DriveItemInfo[]>|null}
    */
-  async getDriveItemsFromSegments(parentId, pathSegments, parentPath) {
-    const key = getCacheKey(parentId, pathSegments);
+  async getDriveItemsFromSegments(parentId, pathSegments, parentPath, type) {
+    const key = getCacheKey(parentId, pathSegments, type);
     let items = lru.get(key);
     if (items) {
       return items;
     }
-    items = await this.getUncachedItemsFromSegments(parentId, pathSegments, parentPath);
+    items = await this.getUncachedItemsFromSegments(parentId, pathSegments, parentPath, type);
     if (items) {
       lru.set(key, items);
       // add invalidation function as not-enumerable to keep compatible objects
@@ -289,11 +300,12 @@ export class GoogleClient {
    * returns the items hierarchy for the given path and root id, starting with the given path.
    * @param {string} parentId
    * @param {string} path
+   * @param {string} [type] optional file mimetype
    * @return {DriveItemInfo[]}
    */
-  async getItemsFromPath(parentId, path) {
+  async getItemsFromPath(parentId, path, type) {
     const segs = createPathSegments(path);
-    const result = await this.getDriveItemsFromSegments(parentId, segs, '');
+    const result = await this.getDriveItemsFromSegments(parentId, segs, '', type);
     if (!result) {
       return [];
     }
@@ -380,9 +392,10 @@ export class GoogleClient {
    *
    * @param {string} parentId the parent id or the id of the item itself, if the path is missing
    * @param {string} [path]
+   * @param {string} [type] optional file mimetype
    * @returns {Promise<DriveItemInfo>}
    */
-  async getItemFromPath(parentId, path) {
+  async getItemFromPath(parentId, path, type) {
     if (!path) {
       try {
         let item = lru.get(parentId);
@@ -419,7 +432,7 @@ export class GoogleClient {
     }
 
     const segs = createPathSegments(path);
-    const items = await this.getDriveItemsFromSegments(parentId, segs, '');
+    const items = await this.getDriveItemsFromSegments(parentId, segs, '', type);
     const item = items?.[0];
     if (!item) {
       return null;
@@ -454,10 +467,11 @@ export class GoogleClient {
    * @param {string} parentId
    * @param {string} path
    * @param {boolean} noRetry {@code true} to avoid retry
+   * @param {string} [type] optional file mimetype
    * @returns {Promise<string>|null} The data of the file or {@code null} if the file does not exist
    */
-  async getFileFromPath(parentId, path, noRetry) {
-    const item = await this.getItemFromPath(parentId, path);
+  async getFileFromPath(parentId, path, noRetry, type) {
+    const item = await this.getItemFromPath(parentId, path, type);
     if (!item) {
       return null;
     }
@@ -479,7 +493,7 @@ export class GoogleClient {
   }
 
   /**
-   * Returns an (uncached) document directly via the google api
+   * Returns an (uncached) document directly via the google docs api
    * @param {string} documentId
    * @returns {object} document
    */
@@ -509,7 +523,7 @@ export class GoogleClient {
    * @returns {Promise<object>|null} The document or {@code null} if the document does not exist
    */
   async getDocumentFromPath(parentId, path, noRetry) {
-    const item = await this.getItemFromPath(parentId, path);
+    const item = await this.getItemFromPath(parentId, path, GoogleClient.TYPE_DOCUMENT);
     if (!item) {
       return null;
     }
@@ -530,3 +544,8 @@ export class GoogleClient {
     }
   }
 }
+
+Object.assign(GoogleClient, {
+  TYPE_DOCUMENT: 'application/vnd.google-apps.document',
+  TYPE_SPREADSHEET: 'application/vnd.google-apps.spreadsheet',
+});
