@@ -301,7 +301,7 @@ export class GoogleClient {
    * @param {string} parentId
    * @param {string} path
    * @param {string} [type] optional file mimetype
-   * @return {DriveItemInfo[]}
+   * @return {Promise<DriveItemInfo[]>}
    */
   async getItemsFromPath(parentId, path, type) {
     const segs = createPathSegments(path);
@@ -443,7 +443,7 @@ export class GoogleClient {
   /**
    * Returns an (uncached) file directly via the google api
    * @param {string} fileId
-   * @returns {string} file data
+   * @returns {Promise<string>} file data
    */
   async getFile(fileId) {
     try {
@@ -495,7 +495,7 @@ export class GoogleClient {
   /**
    * Returns an (uncached) document directly via the google docs api
    * @param {string} documentId
-   * @returns {object} document
+   * @returns {Promise<object>} document
    */
   async getDocument(documentId) {
     const docs = google.docs({

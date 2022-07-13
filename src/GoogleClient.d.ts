@@ -95,7 +95,7 @@ declare class GoogleClient {
    * @param {string} parentId
    * @param {string} path
    * @param {string} [type] optional file mimetype filter.
-   * @return {DriveItemInfo[]}
+   * @return {Promise<DriveItemInfo[]>}
    */
   getDriveItemsFromSegments(parentId:string, path:string, type?:string):Promise<DriveItemInfo[]>;
 
@@ -121,7 +121,7 @@ declare class GoogleClient {
   /**
    * Returns an (uncached) file directly via the google api
    * @param {string} fileId
-   * @returns {string} file data
+   * @returns {Promise<string>} file data
    */
   getFile(fileId:string):Promise<string>;
 
@@ -140,7 +140,7 @@ declare class GoogleClient {
   /**
    * Returns an (uncached) document directly via the google docs api
    * @param {string} documentId
-   * @returns {object} document
+   * @returns {Promise<object>} document
    */
   getDocument(documentId:string):Promise<object>;
 
