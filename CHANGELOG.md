@@ -1,3 +1,10 @@
+## [1.5.6](https://github.com/adobe/helix-google-support/compare/v1.5.5...v1.5.6) (2022-08-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency lru-cache to v7.13.2 ([3f52d90](https://github.com/adobe/helix-google-support/commit/3f52d9006a3e02b00cfb45a564c429724d94aa40))
+
 ## [1.5.5](https://github.com/adobe/helix-google-support/compare/v1.5.4...v1.5.5) (2022-07-30)
 
 
