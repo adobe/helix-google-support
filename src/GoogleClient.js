@@ -443,18 +443,22 @@ export class GoogleClient {
   /**
    * Returns an (uncached) file directly via the google api
    * @param {string} fileId
-   * @returns {Promise<string>} file data
+   * @returns {Promise<Buffer>} file data
    */
   async getFile(fileId) {
     try {
       const res = await this.drive.files.get({
         fileId,
         alt: 'media',
-      });
-      return res.data;
+      }, { responseType: 'arraybuffer' });
+      return Buffer.from(res.data);
     } catch (e) {
       if (e.response && e.response.status === 404) {
         throw new StatusCodeError(`Not Found: ${fileId}`, 404);
+      }
+      // convert message to string
+      if (e.message instanceof ArrayBuffer) {
+        e.message = Buffer.from(e.message).toString('utf-8');
       }
       throw e;
     }
@@ -468,7 +472,7 @@ export class GoogleClient {
    * @param {string} path
    * @param {boolean} noRetry {@code true} to avoid retry
    * @param {string} [type] optional file mimetype
-   * @returns {Promise<string>|null} The data of the file or {@code null} if the file does not exist
+   * @returns {Promise<Buffer>|null} The data of the file or {@code null} if the file does not exist
    */
   async getFileFromPath(parentId, path, noRetry, type) {
     const item = await this.getItemFromPath(parentId, path, type);
