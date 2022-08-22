@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/adobe/helix-google-support/compare/v1.5.10...v2.0.0) (2022-08-22)
+
+
+### Bug Fixes
+
+* getFile() should return Buffer ([bd50867](https://github.com/adobe/helix-google-support/commit/bd50867e9b19aaa4d609203d876e39af57f2868d))
+
+
+### BREAKING CHANGES
+
+* getFile and getFileFromPath now return a Buffer
+
 ## [1.5.10](https://github.com/adobe/helix-google-support/compare/v1.5.9...v1.5.10) (2022-08-13)
 
 
