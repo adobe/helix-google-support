@@ -739,7 +739,8 @@ describe('GoogleClient tests', () => {
         cachePlugin,
       }).init();
 
-      assert.strictEqual(await client.getFile('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP'), 'hello');
+      const actual = await client.getFile('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP');
+      assert.strictEqual(actual.toString('utf-8'), 'hello');
     });
 
     it('getFile handles 404', async () => {
@@ -802,7 +803,8 @@ describe('GoogleClient tests', () => {
         cachePlugin,
       }).init();
 
-      assert.strictEqual(await client.getFileFromPath('1', '/document1'), 'hello');
+      const actual = await client.getFileFromPath('1', '/document1');
+      assert.strictEqual(actual.toString('utf-8'), 'hello');
     });
 
     it('getFileFromPath returns null if not found', async () => {
@@ -871,7 +873,8 @@ describe('GoogleClient tests', () => {
       }).init();
 
       await client.getItemsFromPath('1', '/document1'); // fill the cache
-      assert.strictEqual(await client.getFileFromPath('1', '/document1'), 'hello');
+      const actual = await client.getFileFromPath('1', '/document1');
+      assert.strictEqual(actual.toString('utf-8'), 'hello');
     });
 
     it('getFileFromPath guards against endless recursion', async () => {

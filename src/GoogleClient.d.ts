@@ -9,6 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import { Buffer } from 'node:buffer';
+
 declare interface ICachePlugin {}
 
 declare interface DriveItemInfo {}
@@ -121,9 +123,9 @@ declare class GoogleClient {
   /**
    * Returns an (uncached) file directly via the google api
    * @param {string} fileId
-   * @returns {Promise<string>} file data
+   * @returns {Promise<Buffer>} file data
    */
-  getFile(fileId:string):Promise<string>;
+  getFile(fileId:string):Promise<Buffer>;
 
   /**
    * Fetches the file data from the give path. If the file with the internal id could not be
@@ -133,9 +135,9 @@ declare class GoogleClient {
    * @param {string} path
    * @param {boolean} noRetry {@code true} to avoid retry
    * @param {string} [type] optional file mimetype filter.
-   * @returns {Promise<string>|null} The data of the file or {@code null} if the file does not exist
+   * @returns {Promise<Buffer>|null} The data of the file or {@code null} if the file does not exist
    */
-  getFileFromPath(parentId:string, path:string, noRetry:boolean, type?:string):Promise<string>;
+  getFileFromPath(parentId:string, path:string, noRetry:boolean, type?:string):Promise<Buffer>;
 
   /**
    * Returns an (uncached) document directly via the google docs api
