@@ -1,3 +1,10 @@
+## [2.0.3](https://github.com/adobe/helix-google-support/compare/v2.0.2...v2.0.3) (2022-08-29)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-onedrive-support to v8.2.7 ([#67](https://github.com/adobe/helix-google-support/issues/67)) ([8eb91b6](https://github.com/adobe/helix-google-support/commit/8eb91b6bbf3e545173fddcb29e825c46644aac8c))
+
 ## [2.0.2](https://github.com/adobe/helix-google-support/compare/v2.0.1...v2.0.2) (2022-08-22)
 
 
