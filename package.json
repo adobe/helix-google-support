@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@adobe/helix-onedrive-support": "8.3.4",
-    "googleapis": "107.0.0",
+    "googleapis": "108.0.0",
     "lru-cache": "7.14.0"
   },
   "devDependencies": {
