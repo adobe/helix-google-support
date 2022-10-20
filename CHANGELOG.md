@@ -1,3 +1,10 @@
+## [2.0.18](https://github.com/adobe/helix-google-support/compare/v2.0.17...v2.0.18) (2022-10-20)
+
+
+### Bug Fixes
+
+* enable shared drive support ([#88](https://github.com/adobe/helix-google-support/issues/88)) ([1f47c41](https://github.com/adobe/helix-google-support/commit/1f47c411cb79aceb52a7350486784fd6f9f3b4c6))
+
 ## [2.0.17](https://github.com/adobe/helix-google-support/compare/v2.0.16...v2.0.17) (2022-10-15)
 
 
