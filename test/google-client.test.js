@@ -341,6 +341,7 @@ describe('GoogleClient tests', () => {
         .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP')
         .query({
           fields: 'name,parents,mimeType,modifiedTime',
+          supportsAllDrives: true,
         })
         .reply(200, {
           id: '1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys',
@@ -373,6 +374,7 @@ describe('GoogleClient tests', () => {
         .twice()
         .query({
           fields: 'name,parents,mimeType,modifiedTime',
+          supportsAllDrives: true,
         })
         .reply(200, {
           id: '1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys',
@@ -411,6 +413,7 @@ describe('GoogleClient tests', () => {
         .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP')
         .query({
           fields: 'name,parents,mimeType,modifiedTime',
+          supportsAllDrives: true,
         })
         .reply(404);
 
@@ -431,6 +434,7 @@ describe('GoogleClient tests', () => {
         .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP')
         .query({
           fields: 'name,parents,mimeType,modifiedTime',
+          supportsAllDrives: true,
         })
         .reply(401);
 
@@ -562,6 +566,7 @@ describe('GoogleClient tests', () => {
         .get('/drive/v3/files/1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys')
         .query({
           fields: 'name,parents,mimeType,modifiedTime',
+          supportsAllDrives: true,
         })
         .reply(200, {
           id: '1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys',
@@ -574,6 +579,7 @@ describe('GoogleClient tests', () => {
         .get('/drive/v3/files/1BHM3lyqi0bEeaBZho8UD328oFsmsisyJ')
         .query({
           fields: 'name,parents,mimeType,modifiedTime',
+          supportsAllDrives: true,
         })
         .reply(200, {
           id: '1BHM3lyqi0bEeaBZho8UD328oFsmsisyJ',
@@ -586,6 +592,7 @@ describe('GoogleClient tests', () => {
         .get('/drive/v3/files/1vjng4ahZWph-9oeaMae16P9Kbb3xg4Cg')
         .query({
           fields: 'name,parents,mimeType,modifiedTime',
+          supportsAllDrives: true,
         })
         .reply(200, {
           id: '1vjng4ahZWph-9oeaMae16P9Kbb3xg4Cg',
@@ -630,6 +637,7 @@ describe('GoogleClient tests', () => {
         .get('/drive/v3/files/1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys')
         .query({
           fields: 'name,parents,mimeType,modifiedTime',
+          supportsAllDrives: true,
         })
         .reply(200, {
           id: '1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys',
@@ -642,6 +650,7 @@ describe('GoogleClient tests', () => {
         .get('/drive/v3/files/1BHM3lyqi0bEeaBZho8UD328oFsmsisyJ')
         .query({
           fields: 'name,parents,mimeType,modifiedTime',
+          supportsAllDrives: true,
         })
         .reply(200, {
           id: '1BHM3lyqi0bEeaBZho8UD328oFsmsisyJ',
@@ -654,6 +663,7 @@ describe('GoogleClient tests', () => {
         .get('/drive/v3/files/1vjng4ahZWph-9oeaMae16P9Kbb3xg4Cg')
         .query({
           fields: 'name,parents,mimeType,modifiedTime',
+          supportsAllDrives: true,
         })
         .reply(200, {
           id: '1vjng4ahZWph-9oeaMae16P9Kbb3xg4Cg',
@@ -696,6 +706,7 @@ describe('GoogleClient tests', () => {
         .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP')
         .query({
           fields: 'name,parents,mimeType,modifiedTime',
+          supportsAllDrives: true,
         })
         .reply(404);
 
@@ -729,7 +740,7 @@ describe('GoogleClient tests', () => {
     it('getFile returns file', async () => {
       nock.loginGoogle(1);
       nock('https://www.googleapis.com')
-        .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP?alt=media')
+        .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP?alt=media&supportsAllDrives=true')
         .reply(200, 'hello');
 
       const client = await new GoogleClient({
@@ -746,7 +757,7 @@ describe('GoogleClient tests', () => {
     it('getFile handles 404', async () => {
       nock.loginGoogle(1);
       nock('https://www.googleapis.com')
-        .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP?alt=media')
+        .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP?alt=media&supportsAllDrives=true')
         .reply(404);
 
       const client = await new GoogleClient({
@@ -793,7 +804,7 @@ describe('GoogleClient tests', () => {
         });
 
       nock('https://www.googleapis.com')
-        .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP?alt=media')
+        .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP?alt=media&supportsAllDrives=true')
         .reply(200, 'hello');
 
       const client = await new GoogleClient({
@@ -860,9 +871,9 @@ describe('GoogleClient tests', () => {
         });
 
       nock('https://www.googleapis.com')
-        .get('/drive/v3/files/oldid?alt=media')
+        .get('/drive/v3/files/oldid?alt=media&supportsAllDrives=true')
         .reply(404)
-        .get('/drive/v3/files/newid?alt=media')
+        .get('/drive/v3/files/newid?alt=media&supportsAllDrives=true')
         .reply(200, 'hello');
 
       const client = await new GoogleClient({
@@ -895,7 +906,7 @@ describe('GoogleClient tests', () => {
         });
 
       nock('https://www.googleapis.com')
-        .get('/drive/v3/files/oldid?alt=media')
+        .get('/drive/v3/files/oldid?alt=media&supportsAllDrives=true')
         .twice()
         .reply(404);
 
@@ -926,7 +937,7 @@ describe('GoogleClient tests', () => {
         });
 
       nock('https://www.googleapis.com')
-        .get('/drive/v3/files/oldid?alt=media')
+        .get('/drive/v3/files/oldid?alt=media&supportsAllDrives=true')
         .reply(401);
 
       const client = await new GoogleClient({
