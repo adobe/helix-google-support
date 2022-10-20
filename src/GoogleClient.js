@@ -335,6 +335,7 @@ export class GoogleClient {
         'mimeType',
         'modifiedTime',
       ].join(','),
+      supportsAllDrives: true,
     }));
 
     const root = roots[fileId];
@@ -408,6 +409,7 @@ export class GoogleClient {
               'mimeType',
               'modifiedTime',
             ].join(','),
+            supportsAllDrives: true,
           }));
           item = addFields({
             id: parentId,
@@ -450,6 +452,7 @@ export class GoogleClient {
       const res = await this.drive.files.get({
         fileId,
         alt: 'media',
+        supportsAllDrives: true,
       }, { responseType: 'arraybuffer' });
       return Buffer.from(res.data);
     } catch (e) {
