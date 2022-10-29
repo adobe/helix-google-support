@@ -1,3 +1,10 @@
+## [2.0.22](https://github.com/adobe/helix-google-support/compare/v2.0.21...v2.0.22) (2022-10-29)
+
+
+### Bug Fixes
+
+* **deps:** update dependency googleapis to v108.0.1 ([14e71ad](https://github.com/adobe/helix-google-support/commit/14e71adf2f448bcb192a211a09b1ebc0a45e0432))
+
 ## [2.0.21](https://github.com/adobe/helix-google-support/compare/v2.0.20...v2.0.21) (2022-10-29)
 
 
