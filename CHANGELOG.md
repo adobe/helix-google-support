@@ -1,3 +1,11 @@
+## [2.0.41](https://github.com/adobe/helix-google-support/compare/v2.0.40...v2.0.41) (2023-01-07)
+
+
+### Bug Fixes
+
+* **deps:** update external major ([#118](https://github.com/adobe/helix-google-support/issues/118)) ([c1f9d43](https://github.com/adobe/helix-google-support/commit/c1f9d4392d3a3a94c1d2fb0ceeb36cc874cd10a8))
+* use supported version ([7ff5861](https://github.com/adobe/helix-google-support/commit/7ff5861af013fc9c458e7ca1d01ada5fa361a3cb))
+
 ## [2.0.40](https://github.com/adobe/helix-google-support/compare/v2.0.39...v2.0.40) (2022-12-31)
 
 
