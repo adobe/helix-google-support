@@ -1,3 +1,10 @@
+## [2.0.44](https://github.com/adobe/helix-google-support/compare/v2.0.43...v2.0.44) (2023-01-15)
+
+
+### Bug Fixes
+
+* 404 should be logged as info ([#127](https://github.com/adobe/helix-google-support/issues/127)) ([4a8ca4c](https://github.com/adobe/helix-google-support/commit/4a8ca4c5b3a080ecf770d3768e04ed744e2729c7))
+
 ## [2.0.43](https://github.com/adobe/helix-google-support/compare/v2.0.42...v2.0.43) (2023-01-10)
 
 
