@@ -379,7 +379,7 @@ export class GoogleClient {
       return await this.getItems(fileId, roots);
     } catch (e) {
       if (e.response && e.response.status === 404) {
-        log.warn(`unable to get items for ${fileId}. Not found`);
+        log.info(`unable to get items for ${fileId}. Not found`);
         return [];
       }
       log.warn(`unable to get items for ${fileId}. ${e}`);
