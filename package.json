@@ -32,14 +32,14 @@
   "dependencies": {
     "@adobe/helix-onedrive-support": "9.1.17",
     "googleapis": "111.0.0",
-    "lru-cache": "7.17.0"
+    "lru-cache": "7.18.1"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.2",
     "@semantic-release/changelog": "6.0.2",
     "@semantic-release/git": "10.0.1",
     "c8": "7.13.0",
-    "eslint": "8.34.0",
+    "eslint": "8.35.0",
     "eslint-plugin-header": "3.1.1",
     "eslint-plugin-import": "2.27.5",
     "husky": "8.0.3",
@@ -48,7 +48,7 @@
     "mocha": "10.2.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.3.0",
-    "semantic-release": "20.1.0"
+    "semantic-release": "20.1.1"
   },
   "lint-staged": {
     "*.js": "eslint",
