@@ -1,3 +1,10 @@
+## [2.0.58](https://github.com/adobe/helix-google-support/compare/v2.0.57...v2.0.58) (2023-03-13)
+
+
+### Bug Fixes
+
+* **deps:** update external major ([#150](https://github.com/adobe/helix-google-support/issues/150)) ([f402e07](https://github.com/adobe/helix-google-support/commit/f402e07e110e768e5993b29a6084e96b071077d4))
+
 ## [2.0.57](https://github.com/adobe/helix-google-support/compare/v2.0.56...v2.0.57) (2023-03-11)
 
 
