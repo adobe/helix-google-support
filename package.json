@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@adobe/helix-onedrive-support": "9.1.24",
-    "googleapis": "113.0.0",
+    "googleapis": "114.0.0",
     "lru-cache": "8.0.4"
   },
   "devDependencies": {
@@ -48,7 +48,7 @@
     "mocha": "10.2.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.3.0",
-    "semantic-release": "20.1.3"
+    "semantic-release": "21.0.0"
   },
   "lint-staged": {
     "*.js": "eslint",
