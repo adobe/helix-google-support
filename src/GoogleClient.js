@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import LRU from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import { google } from 'googleapis';
 import {
   editDistance, sanitizeName, splitByExtension,
@@ -17,7 +17,7 @@ import {
 import { StatusCodeError } from '@adobe/helix-onedrive-support';
 import { GoogleTokenCache } from './GoogleTokenCache.js';
 
-let lru = new LRU({ max: 1000, ttl: 60000 });
+let lru = new LRUCache({ max: 1000, ttl: 60000 });
 
 /**
  * @typedef DriveItemInfo {
@@ -71,7 +71,7 @@ export class GoogleClient {
    * @param opts
    */
   static setItemCacheOptions(opts) {
-    lru = new LRU(opts);
+    lru = new LRUCache(opts);
   }
 
   /**
