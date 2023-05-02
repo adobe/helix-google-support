@@ -30,11 +30,12 @@
     "reporter-options": "configFile=.mocha-multi.json"
   },
   "dependencies": {
-    "@adobe/helix-onedrive-support": "9.1.32",
+    "@adobe/helix-onedrive-support": "10.0.0",
     "googleapis": "118.0.0",
     "lru-cache": "9.1.1"
   },
   "devDependencies": {
+    "@adobe/helix-shared-tokencache": "1.0.0",
     "@adobe/eslint-config-helix": "2.0.2",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",

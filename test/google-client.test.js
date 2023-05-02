@@ -12,7 +12,7 @@
 /* eslint-env mocha */
 import assert from 'assert';
 import { decode } from 'querystring';
-import { MemCachePlugin } from '@adobe/helix-onedrive-support';
+import { MemCachePlugin } from '@adobe/helix-shared-tokencache';
 import { GoogleClient } from '../src/index.js';
 import { Nock } from './utils.js';
 
