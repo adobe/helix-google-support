@@ -1,3 +1,10 @@
+## [2.0.76](https://github.com/adobe/helix-google-support/compare/v2.0.75...v2.0.76) (2023-05-03)
+
+
+### Bug Fixes
+
+* use latest onedrive-support ([#176](https://github.com/adobe/helix-google-support/issues/176)) ([4bf77c5](https://github.com/adobe/helix-google-support/commit/4bf77c52bf6af3dd01d6ea19e3acc7016ded50c1))
+
 ## [2.0.75](https://github.com/adobe/helix-google-support/compare/v2.0.74...v2.0.75) (2023-04-29)
 
 
