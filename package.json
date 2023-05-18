@@ -30,7 +30,7 @@
     "reporter-options": "configFile=.mocha-multi.json"
   },
   "dependencies": {
-    "@adobe/helix-onedrive-support": "10.0.8",
+    "@adobe/helix-onedrive-support": "10.0.9",
     "googleapis": "118.0.0",
     "lru-cache": "9.1.1"
   },
