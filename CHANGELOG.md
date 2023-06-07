@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/adobe/helix-google-support/compare/v2.0.90...v2.1.0) (2023-06-07)
+
+
+### Features
+
+* add size information in getItemsFromPath ([#201](https://github.com/adobe/helix-google-support/issues/201)) ([5f0722c](https://github.com/adobe/helix-google-support/commit/5f0722cb91d04642064a655d4f0444e68daea5b1))
+
 ## [2.0.90](https://github.com/adobe/helix-google-support/compare/v2.0.89...v2.0.90) (2023-06-05)
 
 
