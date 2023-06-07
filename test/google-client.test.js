@@ -18,7 +18,7 @@ import { Nock } from './utils.js';
 
 describe('GoogleClient tests', () => {
   const DEFAULT_LIST_OPTS = {
-    fields: 'nextPageToken, files(id, name, mimeType, modifiedTime)',
+    fields: 'nextPageToken, files(id, name, mimeType, modifiedTime, size)',
     pageSize: 1000,
     includeItemsFromAllDrives: 'true',
     supportsAllDrives: 'true',
@@ -99,6 +99,7 @@ describe('GoogleClient tests', () => {
             name: 'structure',
             id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUw',
             modifiedTime: 'Sat, 15 Feb 2031 06:59:41 GMT',
+            size: 1234,
           }],
           nextPageToken: 'fake-next-token',
         })
@@ -131,6 +132,7 @@ describe('GoogleClient tests', () => {
           name: 'structure',
           path: '/deeply/nested/structure',
           mimeType: 'application/vnd.google-apps.sheets',
+          size: 1234,
         },
         {
           id: 124,

@@ -30,7 +30,7 @@ let lru = new LRUCache({ max: 1000, ttl: 60000 });
  */
 
 /**
- * Adds the last modified property and mimeType if defined in item
+ * Adds the last modified property and mimeType and size if defined in item
  * @param {DriveItemInfo} itemInfo
  * @param item
  * @returns {DriveItemInfo}
@@ -43,6 +43,10 @@ function addFields(itemInfo, item) {
   if (item.mimeType) {
     // eslint-disable-next-line no-param-reassign
     itemInfo.mimeType = item.mimeType;
+  }
+  if (item.size) {
+    // eslint-disable-next-line no-param-reassign
+    itemInfo.size = item.size;
   }
   return itemInfo;
 }
@@ -188,7 +192,7 @@ export class GoogleClient {
         'and trashed=false',
         mimeTypeFilter,
       ].join(' '),
-      fields: 'nextPageToken, files(id, name, mimeType, modifiedTime)',
+      fields: 'nextPageToken, files(id, name, mimeType, modifiedTime, size)',
       includeItemsFromAllDrives: true,
       supportsAllDrives: true,
       pageSize: 1000,
