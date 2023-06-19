@@ -95,13 +95,20 @@ export class GoogleClient {
    * @param {ICachePlugin} plugin
    */
   constructor(opts) {
-    Object.assign(this, {
-      log: opts.log,
-      auth: new google.auth.OAuth2(
+    let auth;
+    if (opts.token) {
+      auth = new google.auth.OAuth2();
+      auth.setCredentials({ access_token: `${opts.token}` });
+    } else {
+      auth = new google.auth.OAuth2(
         opts.clientId,
         opts.clientSecret,
         opts.redirectUri,
-      ),
+      );
+    }
+    Object.assign(this, {
+      log: opts.log,
+      auth,
     });
 
     if (opts.cachePlugin) {
