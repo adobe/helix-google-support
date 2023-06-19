@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/adobe/helix-google-support/compare/v2.1.1...v2.2.0) (2023-06-19)
+
+
+### Features
+
+* Initialise Google Client with access token ([#208](https://github.com/adobe/helix-google-support/issues/208)) ([d539816](https://github.com/adobe/helix-google-support/commit/d5398161e9020aa6e9df17609d31800df1e2b425))
+
 ## [2.1.1](https://github.com/adobe/helix-google-support/compare/v2.1.0...v2.1.1) (2023-06-18)
 
 
