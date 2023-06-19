@@ -502,6 +502,29 @@ describe('GoogleClient tests', () => {
     });
   });
 
+  it('init GoogleClient with accessToken directly', async () => {
+    const dummyTokenInfo = {
+      azp: 'xxxxx.apps.googleusercontent.com',
+      aud: 'yyyyy.apps.googleusercontent.com',
+      sub: '110771752856871247958',
+      scope: 'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/spreadsheets openid https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+      exp: '1687179346',
+      expires_in: '3491',
+      email: 'dummy@adobe.com',
+      email_verified: 'true',
+      access_type: 'online',
+    };
+    nock('https://oauth2.googleapis.com')
+      .post('/tokeninfo')
+      .reply(200, dummyTokenInfo);
+    const client = new GoogleClient({
+      log: console,
+      token: 'dummy-access',
+    });
+    const tokenInfo = await client.auth.getTokenInfo('dummy-access');
+    assert.equal(tokenInfo.email, dummyTokenInfo.email);
+  });
+
   it('token is refreshed', async () => {
     const nowOld = Date.now() - 60 * 1000;
     const nowNew = Date.now() + 60 * 1000;
