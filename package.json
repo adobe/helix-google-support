@@ -32,14 +32,14 @@
   "dependencies": {
     "@adobe/helix-onedrive-support": "10.1.1",
     "googleapis": "118.0.0",
-    "lru-cache": "9.1.2"
+    "lru-cache": "10.0.0"
   },
   "devDependencies": {
     "@adobe/helix-shared-tokencache": "1.2.6",
     "@adobe/eslint-config-helix": "2.0.2",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
-    "c8": "7.14.0",
+    "c8": "8.0.0",
     "eslint": "8.43.0",
     "eslint-plugin-header": "3.1.1",
     "eslint-plugin-import": "2.27.5",
