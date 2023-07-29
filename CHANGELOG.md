@@ -1,3 +1,10 @@
+## [2.2.10](https://github.com/adobe/helix-google-support/compare/v2.2.9...v2.2.10) (2023-07-29)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([#225](https://github.com/adobe/helix-google-support/issues/225)) ([9a0bb8e](https://github.com/adobe/helix-google-support/commit/9a0bb8ed5b4ea9ce19dc8c08bdf192b73f2b57a7))
+
 ## [2.2.9](https://github.com/adobe/helix-google-support/compare/v2.2.8...v2.2.9) (2023-07-27)
 
 
