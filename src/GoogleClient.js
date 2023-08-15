@@ -471,6 +471,7 @@ export class GoogleClient {
         throw new StatusCodeError(`Not Found: ${fileId}`, 404);
       }
       // convert message to string
+      /* c8 ignore next 3 */
       if (e.message instanceof ArrayBuffer) {
         e.message = Buffer.from(e.message).toString('utf-8');
       }
