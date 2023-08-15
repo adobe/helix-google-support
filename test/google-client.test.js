@@ -787,7 +787,7 @@ describe('GoogleClient tests', () => {
       nock.loginGoogle(1);
       nock('https://www.googleapis.com')
         .get('/drive/v3/files/1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP?alt=media&supportsAllDrives=true')
-        .reply(404);
+        .reply(404, {});
 
       const client = await new GoogleClient({
         log: console,
@@ -901,7 +901,7 @@ describe('GoogleClient tests', () => {
 
       nock('https://www.googleapis.com')
         .get('/drive/v3/files/oldid?alt=media&supportsAllDrives=true')
-        .reply(404)
+        .reply(404, {})
         .get('/drive/v3/files/newid?alt=media&supportsAllDrives=true')
         .reply(200, 'hello');
 
@@ -937,7 +937,7 @@ describe('GoogleClient tests', () => {
       nock('https://www.googleapis.com')
         .get('/drive/v3/files/oldid?alt=media&supportsAllDrives=true')
         .twice()
-        .reply(404);
+        .reply(404, {});
 
       const client = await new GoogleClient({
         log: console,
@@ -967,7 +967,12 @@ describe('GoogleClient tests', () => {
 
       nock('https://www.googleapis.com')
         .get('/drive/v3/files/oldid?alt=media&supportsAllDrives=true')
-        .reply(401);
+        .reply(403, {
+          error: {
+            code: 403,
+            message: 'The request is missing a valid API key.',
+          },
+        });
 
       const client = await new GoogleClient({
         log: console,
@@ -976,7 +981,7 @@ describe('GoogleClient tests', () => {
         cachePlugin,
       }).init();
 
-      await assert.rejects(client.getFileFromPath('1', '/document1'), new Error(''));
+      await assert.rejects(client.getFileFromPath('1', '/document1'), new Error('The request is missing a valid API key.'));
     });
   });
 
