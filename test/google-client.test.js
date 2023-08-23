@@ -1196,4 +1196,56 @@ describe('GoogleClient tests', () => {
       await assert.rejects(client.getDocument('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP'), new Error('Could not refresh access token: rate limit exceeded.'));
     });
   });
+
+  describe('File creation tests', () => {
+    it('should create a file(sheet or doc) successfully', async () => {
+      // Define the expected request body and response
+      const requestBody = {
+        name: 'TestFile',
+        mimeType: GoogleClient.TYPE_DOCUMENT,
+        parents: ['dummy-parent-id'],
+      };
+
+      const responseMock = {
+        kind: 'drive#file',
+        id: 'test-file-id',
+        name: 'TestFile',
+      };
+
+      // Mock the Google Drive API request
+      nock.loginGoogle(1);
+      nock('https://www.googleapis.com')
+        .post('/drive/v3/files', (body) => {
+          // Verify that the request body matches the expected body
+          assert.deepStrictEqual(body, requestBody);
+          return true;
+        })
+        .reply(200, responseMock);
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      // Call the createFile function with test parameters
+      const result = await client.createBlankDocOrSheet('dummy-parent-id', 'TestFile', GoogleClient.TYPE_DOCUMENT);
+
+      // Verify that the function returns the expected result
+      assert.deepStrictEqual(result, responseMock);
+    });
+
+    it('should throw an error if the file creation fails, mime type not supported', async () => {
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      // Verify that the function returns the expected result
+      await assert.rejects(client.createBlankDocOrSheet('dummy-parent-id', 'TestFile', 'image/jpeg'), new Error('Invalid mimeType image/jpeg'));
+    });
+  });
 });

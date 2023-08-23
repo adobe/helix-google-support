@@ -562,6 +562,42 @@ export class GoogleClient {
       }
     }
   }
+
+  /**
+   *
+   * @param {string} parentId
+   * @param {string} name
+   * @param {string} mimeType one of GoogleClient.TYPE_DOCUMENT or GoogleClient.TYPE_SPREADSHEET
+   * @returns {Promise<object>} file object
+   */
+
+  async createBlankDocOrSheet(parentId, name, mimeType) {
+    try {
+      if (
+        mimeType !== GoogleClient.TYPE_DOCUMENT
+        && mimeType !== GoogleClient.TYPE_SPREADSHEET
+      ) {
+        throw new Error(`Invalid mimeType ${mimeType}`);
+      }
+      const requestBody = {
+        name,
+        mimeType,
+      };
+
+      if (parentId) {
+        requestBody.parents = [parentId];
+      }
+
+      const response = await this.drive.files.create({
+        requestBody,
+      });
+
+      return response.data;
+    } catch (e) {
+      this.log.info(`Error creating file ${name}`);
+      throw e;
+    }
+  }
 }
 
 Object.assign(GoogleClient, {

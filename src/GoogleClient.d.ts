@@ -156,4 +156,14 @@ declare class GoogleClient {
    * @returns {Promise<object>|null} The document or {@code null} if the document does not exist
    */
   getDocumentFromPath(parentId:string, path:string, noRetry:boolean):Promise<object>;
+
+   /**
+   *  create a new file in the given parent folder with the given name and mimetype
+   *  @param {string} parentId
+   * @param {string} name
+   * @param {string} mimeType either {@link GoogleClient.TYPE_DOCUMENT} or {@link GoogleClient.TYPE_SPREADSHEET}
+   * @returns {Promise<Object>} file object
+   */ 
+
+   createBlankDocOrSheet(parentId:string, name:string, mimeType:string):Promise<Object>;
 }
