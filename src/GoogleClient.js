@@ -598,6 +598,113 @@ export class GoogleClient {
       throw e;
     }
   }
+
+  /**
+   *
+   * @param {string} spreadsheetId
+   * @param {string} sheetName
+   * @param {object} worksheetData
+   * @returns {string} sheetId
+   */
+
+  async createOrUpdateGSheet(spreadsheetId, sheetName, worksheetData) {
+    try {
+      const sheets = google.sheets({
+        version: 'v4',
+        auth: this.auth,
+      });
+
+      // Check if the sheet already exists
+      const spreadsheetInfo = await sheets.spreadsheets.get({ spreadsheetId });
+
+      const sheetExists = spreadsheetInfo.data.sheets.some(
+        (sheet) => sheet.properties.title === sheetName,
+      );
+      let sheetId;
+
+      if (!sheetExists) {
+        // Create a new sheet if it doesn't exist
+        const createResponse = await sheets.spreadsheets.batchUpdate({
+          spreadsheetId,
+          requestBody: {
+            requests: [
+              {
+                addSheet: {
+                  properties: {
+                    title: sheetName,
+                  },
+                },
+              },
+            ],
+          },
+        });
+
+        // Get the sheet ID of the newly created sheet
+        sheetId = createResponse.data.replies[0].addSheet.properties.sheetId;
+      } else {
+        // Get the sheet ID of the existing sheet
+        const sheetInfo = spreadsheetInfo.data.sheets.find(
+          (sheet) => sheet.properties.title === sheetName,
+        );
+        sheetId = sheetInfo.properties.sheetId;
+      }
+
+      if (Array.isArray(worksheetData) && Array.isArray(worksheetData[0])) {
+        await sheets.spreadsheets.values.update({
+          spreadsheetId,
+          range: `'${sheetName}'`,
+          valueInputOption: 'RAW',
+          resource: {
+            values: worksheetData,
+          },
+        });
+      }
+      return sheetId;
+    } catch (error) {
+      this.log.info(`Error creating or updating sheet: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   *
+   * @param {string} spreadsheetId
+   * @param {string} sheetName
+   *
+   *  @returns void
+   */
+
+  async deleteGSheet(spreadsheetId, sheetName) {
+    try {
+      const sheets = google.sheets({
+        version: 'v4',
+        auth: this.auth,
+      });
+
+      const sheetsResponse = await sheets.spreadsheets.get({
+        spreadsheetId,
+        ranges: [sheetName],
+        fields: 'sheets.properties.sheetId',
+      });
+
+      const existingSheetId = sheetsResponse.data.sheets[0].properties.sheetId;
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+          requests: [
+            {
+              deleteSheet: {
+                sheetId: existingSheetId,
+              },
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      this.log.info(`Error deleting sheet from spreadsheet: ${error.message}`);
+      throw error;
+    }
+  }
 }
 
 Object.assign(GoogleClient, {

@@ -166,4 +166,26 @@ declare class GoogleClient {
    */ 
 
    createBlankDocOrSheet(parentId:string, name:string, mimeType:string):Promise<Object>;
+
+
+   /**
+    * 
+    * @param {string} spreadsheetId 
+    * @param {string} sheetName 
+    * @param {object} worksheetData 
+    * 
+    * @returns {Promise<Object>} GSheet object
+    */
+   createOrUpdateGSheet(spreadsheetId:string, sheetName:string, worksheetData:object):Promise<Object>;
+
+
+   /**
+    * 
+    * @param spreadsheetId 
+    * @param sheetName sheetName to delete in the spreadsheet
+    * 
+    *  @returns {Promise<void>}
+    */
+   deleteGSheet(spreadsheetId:string , sheetName:string):Promise<void>;
+
 }
