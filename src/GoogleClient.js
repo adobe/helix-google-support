@@ -570,7 +570,6 @@ export class GoogleClient {
    * @param {string} mimeType one of GoogleClient.TYPE_DOCUMENT or GoogleClient.TYPE_SPREADSHEET
    * @returns {Promise<object>} file object
    */
-
   async createBlankDocOrSheet(parentId, name, mimeType) {
     try {
       if (

@@ -9,6 +9,7 @@
   },
   "scripts": {
     "test": "c8 mocha",
+    "testd": "c8 mocha --inspect-brk",
     "lint": "eslint .",
     "semantic-release": "semantic-release",
     "prepare": "husky install"
