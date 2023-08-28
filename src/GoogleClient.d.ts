@@ -163,8 +163,7 @@ declare class GoogleClient {
    * @param {string} name
    * @param {string} mimeType either {@link GoogleClient.TYPE_DOCUMENT} or {@link GoogleClient.TYPE_SPREADSHEET}
    * @returns {Promise<Object>} file object
-   */ 
-
+   */
    createBlankDocOrSheet(parentId:string, name:string, mimeType:string):Promise<Object>;
 
 
@@ -184,7 +183,7 @@ declare class GoogleClient {
     * @param spreadsheetId 
     * @param sheetName sheetName to delete in the spreadsheet
     * 
-    *  @returns {Promise<void>}
+    * @returns {Promise<void>}
     */
    deleteGSheet(spreadsheetId:string , sheetName:string):Promise<void>;
 

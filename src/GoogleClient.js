@@ -606,7 +606,6 @@ export class GoogleClient {
    * @param {object} worksheetData
    * @returns {string} sheetId
    */
-
   async createOrUpdateGSheet(spreadsheetId, sheetName, worksheetData) {
     try {
       const sheets = google.sheets({
@@ -671,9 +670,8 @@ export class GoogleClient {
    * @param {string} spreadsheetId
    * @param {string} sheetName
    *
-   *  @returns void
+   * @returns void
    */
-
   async deleteGSheet(spreadsheetId, sheetName) {
     try {
       const sheets = google.sheets({
