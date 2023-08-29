@@ -1250,7 +1250,7 @@ describe('GoogleClient tests', () => {
   });
 
   describe('GSheet tests', () => {
-    it('should create a Gsheet with give name', async () => {
+    it('should create a Gsheet with given name', async () => {
       const spreadsheetId = '1bH7_28a5-Q3QEEvFhT9eTmR-D7_9F4xP';
       const sheetName = 'TestSheet';
       const worksheetData = [['A', 'B'], [1, 2]];
@@ -1280,12 +1280,12 @@ describe('GoogleClient tests', () => {
         cachePlugin,
       }).init();
 
-      const sheetId = await client.createOrUpdateGSheet(spreadsheetId, sheetName, worksheetData);
+      const sheetId = await client.updateSheet(spreadsheetId, sheetName, worksheetData, true);
 
       assert.equal(sheetId, 123456789);
     });
 
-    it('should update a Gsheet with give name', async () => {
+    it('should update a Gsheet with give name if sheet already exist', async () => {
       const spreadsheetId = '1bH7_28a5-Q3QEEvFhT9eTmR-D7_9F4xP';
       const sheetName = 'TestSheet';
       const worksheetData = [['A', 'B'], [1, 2]];
@@ -1312,12 +1312,12 @@ describe('GoogleClient tests', () => {
         cachePlugin,
       }).init();
 
-      const sheetId = await client.createOrUpdateGSheet(spreadsheetId, sheetName, worksheetData);
+      const sheetId = await client.updateSheet(spreadsheetId, sheetName, worksheetData, false);
 
       assert.equal(sheetId, 123456789);
     });
 
-    it('should throw an error if sheet create or update fails', async () => {
+    it('should throw an error if sheet update fails', async () => {
       const spreadsheetId = '1bH7_28a5-Q3QEEvFhT9eTmR-D7_9F4xP';
       const sheetName = 'TestSheet';
       const worksheetData = [['A', 'B'], [1, 2]];
@@ -1334,7 +1334,29 @@ describe('GoogleClient tests', () => {
         cachePlugin,
       }).init();
 
-      await assert.rejects(client.createOrUpdateGSheet(spreadsheetId, sheetName, worksheetData));
+      await assert.rejects(client.updateSheet(spreadsheetId, sheetName, worksheetData));
+    });
+
+    it('should return null if create false and sheet does not exist', async () => {
+      const spreadsheetId = '1bH7_28a5-Q3QEEvFhT9eTmR-D7_9F4xP';
+      const name = 'TestSheet';
+      const data = [['A', 'B'], [1, 2]];
+      nock.loginGoogle(1);
+
+      nock('https://sheets.googleapis.com')
+        .get(`/v4/spreadsheets/${spreadsheetId}`)
+        .reply(200, {
+          sheets: [],
+        });
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      await assert.strictEqual(await client.updateSheet(spreadsheetId, name, data, false), null);
     });
 
     it('should throw an error if sheet deletion fails', async () => {

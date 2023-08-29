@@ -603,9 +603,10 @@ export class GoogleClient {
    * @param {string} spreadsheetId
    * @param {string} sheetName
    * @param {object} worksheetData
-   * @returns {string} sheetId
+   * @param {boolean} create - Indicates whether to create the sheet if it doesn't exist
+   * @returns {Promise<string>} sheetId or {@code null}
    */
-  async createOrUpdateGSheet(spreadsheetId, sheetName, worksheetData) {
+  async updateSheet(spreadsheetId, sheetName, worksheetData, create = true) {
     try {
       const sheets = google.sheets({
         version: 'v4',
@@ -618,10 +619,16 @@ export class GoogleClient {
       const sheetExists = spreadsheetInfo.data.sheets.some(
         (sheet) => sheet.properties.title === sheetName,
       );
+
+      if (!sheetExists && !create) {
+        this.log.info('Sheet does not exists and not creating, nothing to do.');
+        return null;
+      }
+
       let sheetId;
 
-      if (!sheetExists) {
-        // Create a new sheet if it doesn't exist
+      if (!sheetExists && create) {
+        // Create a new sheet if it doesn't exist and the 'create' flag is true
         const createResponse = await sheets.spreadsheets.batchUpdate({
           spreadsheetId,
           requestBody: {
@@ -659,7 +666,7 @@ export class GoogleClient {
       }
       return sheetId;
     } catch (error) {
-      this.log.info(`Error creating or updating sheet: ${error.message}`);
+      this.log.info(`Error in updating sheet: ${error.message}`);
       throw error;
     }
   }

@@ -162,9 +162,9 @@ declare class GoogleClient {
    *  @param {string} parentId
    * @param {string} name
    * @param {string} mimeType either {@link GoogleClient.TYPE_DOCUMENT} or {@link GoogleClient.TYPE_SPREADSHEET}
-   * @returns {Promise<Object>} file object
+   * @returns {Promise<object>} file object
    */
-   createBlankDocOrSheet(parentId:string, name:string, mimeType:string):Promise<Object>;
+   createBlankDocOrSheet(parentId:string, name:string, mimeType:string):Promise<object>;
 
 
    /**
@@ -173,9 +173,9 @@ declare class GoogleClient {
     * @param {string} sheetName 
     * @param {object} worksheetData 
     * 
-    * @returns {Promise<Object>} GSheet object
+    * @returns {Promise<string>} sheetId or {@code null}
     */
-   createOrUpdateGSheet(spreadsheetId:string, sheetName:string, worksheetData:object):Promise<Object>;
+   updateSheet(spreadsheetId:string, sheetName:string, worksheetData:object, create:boolean):Promise<string>;
 
 
    /**
@@ -185,6 +185,6 @@ declare class GoogleClient {
     * 
     * @returns {Promise<void>}
     */
-   deleteGSheet(spreadsheetId:string , sheetName:string):Promise<void>;
+   deleteSheet(spreadsheetId:string, sheetName:string):Promise<void>;
 
 }
