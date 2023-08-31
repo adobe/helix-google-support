@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/adobe/helix-google-support/compare/v2.2.17...v2.3.0) (2023-08-31)
+
+
+### Features
+
+* sheet create/update/delete functionalities ([a6b8e65](https://github.com/adobe/helix-google-support/commit/a6b8e65280e964201e6a3be2e24a681a3e3cd2f8))
+
 ## [2.2.17](https://github.com/adobe/helix-google-support/compare/v2.2.16...v2.2.17) (2023-08-28)
 
 
