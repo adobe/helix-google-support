@@ -1196,4 +1196,219 @@ describe('GoogleClient tests', () => {
       await assert.rejects(client.getDocument('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP'), new Error('Could not refresh access token: rate limit exceeded.'));
     });
   });
+
+  describe('File creation tests', () => {
+    it('should create a file(sheet or doc) successfully', async () => {
+      // Define the expected request body and response
+      const requestBody = {
+        name: 'TestFile',
+        mimeType: GoogleClient.TYPE_DOCUMENT,
+        parents: ['dummy-parent-id'],
+      };
+
+      const responseMock = {
+        kind: 'drive#file',
+        id: 'test-file-id',
+        name: 'TestFile',
+      };
+
+      // Mock the Google Drive API request
+      nock.loginGoogle(1);
+      nock('https://www.googleapis.com')
+        .post('/drive/v3/files', (body) => {
+          // Verify that the request body matches the expected body
+          assert.deepStrictEqual(body, requestBody);
+          return true;
+        })
+        .reply(200, responseMock);
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      // Call the createFile function with test parameters
+      const result = await client.createBlankDocOrSheet('dummy-parent-id', 'TestFile', GoogleClient.TYPE_DOCUMENT);
+
+      // Verify that the function returns the expected result
+      assert.deepStrictEqual(result, responseMock);
+    });
+
+    it('should throw an error if the file creation fails, mime type not supported', async () => {
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      // Verify that the function returns the expected result
+      await assert.rejects(client.createBlankDocOrSheet('dummy-parent-id', 'TestFile', 'image/jpeg'), new Error('Invalid mimeType image/jpeg'));
+    });
+  });
+
+  describe('GSheet tests', () => {
+    it('should create a Gsheet with given name', async () => {
+      const spreadsheetId = '1bH7_28a5-Q3QEEvFhT9eTmR-D7_9F4xP';
+      const sheetName = 'TestSheet';
+      const worksheetData = [['A', 'B'], [1, 2]];
+      nock.loginGoogle(3);
+      nock('https://sheets.googleapis.com')
+        .get(`/v4/spreadsheets/${spreadsheetId}`)
+        .reply(200, {
+          sheets: [],
+        })
+        .post(`/v4/spreadsheets/${spreadsheetId}:batchUpdate`, (body) => body.requests[0].addSheet.properties.title === sheetName)
+        .reply(200, {
+          replies: [{
+            addSheet: {
+              properties: {
+                sheetId: 123456789, // Replace with a valid sheetId
+              },
+            },
+          }],
+        })
+        .put(`/v4/spreadsheets/${spreadsheetId}/values/%27${sheetName}%27?valueInputOption=RAW`, (body) => body.values[0][0] === 'A' && body.values[0][1] === 'B')
+        .reply(200);
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      const sheetId = await client.updateSheet(spreadsheetId, sheetName, worksheetData, true);
+
+      assert.equal(sheetId, 123456789);
+    });
+
+    it('should update a Gsheet with give name if sheet already exist', async () => {
+      const spreadsheetId = '1bH7_28a5-Q3QEEvFhT9eTmR-D7_9F4xP';
+      const sheetName = 'TestSheet';
+      const worksheetData = [['A', 'B'], [1, 2]];
+      nock.loginGoogle(2);
+      nock('https://sheets.googleapis.com')
+        .get(`/v4/spreadsheets/${spreadsheetId}`)
+        .reply(200, {
+          sheets: [
+            {
+              properties: {
+                title: sheetName,
+                sheetId: 123456789,
+              },
+            },
+          ],
+        })
+        .put(`/v4/spreadsheets/${spreadsheetId}/values/%27${sheetName}%27?valueInputOption=RAW`, (body) => body.values[0][0] === 'A' && body.values[0][1] === 'B')
+        .reply(200);
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      const sheetId = await client.updateSheet(spreadsheetId, sheetName, worksheetData, false);
+
+      assert.equal(sheetId, 123456789);
+    });
+
+    it('should throw an error if sheet update fails', async () => {
+      const spreadsheetId = '1bH7_28a5-Q3QEEvFhT9eTmR-D7_9F4xP';
+      const sheetName = 'TestSheet';
+      const worksheetData = [['A', 'B'], [1, 2]];
+      nock.loginGoogle(1);
+
+      nock('https://sheets.googleapis.com')
+        .get(`/v4/spreadsheets/${spreadsheetId}`)
+        .reply(404);
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      await assert.rejects(client.updateSheet(spreadsheetId, sheetName, worksheetData));
+    });
+
+    it('should return null if create false and sheet does not exist', async () => {
+      const spreadsheetId = '1bH7_28a5-Q3QEEvFhT9eTmR-D7_9F4xP';
+      const name = 'TestSheet';
+      const data = [['A', 'B'], [1, 2]];
+      nock.loginGoogle(1);
+
+      nock('https://sheets.googleapis.com')
+        .get(`/v4/spreadsheets/${spreadsheetId}`)
+        .reply(200, {
+          sheets: [],
+        });
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      await assert.strictEqual(await client.updateSheet(spreadsheetId, name, data, false), null);
+    });
+
+    it('should throw an error if sheet deletion fails', async () => {
+      const spreadsheetId = '1bH7_28a5-Q3QEEvFhT9eTmR-D7_9F4xP';
+      const sheetName = 'TestSheet';
+      nock.loginGoogle(1);
+
+      nock('https://sheets.googleapis.com')
+        .get(`/v4/spreadsheets/${spreadsheetId}?ranges=${sheetName}&fields=sheets.properties.sheetId`)
+        .reply(404);
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      await assert.rejects(client.deleteGSheet(spreadsheetId, sheetName));
+    });
+
+    it('should delete the given sheet name', async () => {
+      const spreadsheetId = '2bH7_28a5-Q3QEEvFhT9eTmR-D7_9F4x1';
+      const sheetName = 'TestSheet';
+      nock.loginGoogle(2);
+
+      nock('https://sheets.googleapis.com')
+        .get(`/v4/spreadsheets/${spreadsheetId}?ranges=${sheetName}&fields=sheets.properties.sheetId`)
+        .reply(200, {
+          sheets: [
+            {
+              properties: {
+                sheetId: 123456789,
+                title: sheetName,
+              },
+            },
+          ],
+        })
+        .post(`/v4/spreadsheets/${spreadsheetId}:batchUpdate`, (body) => (
+          body.requests.length === 1
+        && body.requests[0].deleteSheet.sheetId === 123456789
+        ))
+        .reply(200);
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      assert.doesNotReject(await client.deleteGSheet(spreadsheetId, sheetName));
+    });
+  });
 });

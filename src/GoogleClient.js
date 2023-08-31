@@ -562,6 +562,153 @@ export class GoogleClient {
       }
     }
   }
+
+  /**
+   *
+   * @param {string} parentId
+   * @param {string} name
+   * @param {string} mimeType one of GoogleClient.TYPE_DOCUMENT or GoogleClient.TYPE_SPREADSHEET
+   * @returns {Promise<object>} file object
+   */
+  async createBlankDocOrSheet(parentId, name, mimeType) {
+    try {
+      if (
+        mimeType !== GoogleClient.TYPE_DOCUMENT
+        && mimeType !== GoogleClient.TYPE_SPREADSHEET
+      ) {
+        throw new Error(`Invalid mimeType ${mimeType}`);
+      }
+      const requestBody = {
+        name,
+        mimeType,
+      };
+
+      if (parentId) {
+        requestBody.parents = [parentId];
+      }
+
+      const response = await this.drive.files.create({
+        requestBody,
+      });
+
+      return response.data;
+    } catch (e) {
+      this.log.info(`Error creating file ${name}`);
+      throw e;
+    }
+  }
+
+  /**
+   *
+   * @param {string} spreadsheetId
+   * @param {string} sheetName
+   * @param {object} worksheetData
+   * @param {boolean} create - Indicates whether to create the sheet if it doesn't exist
+   * @returns {Promise<string>} sheetId or {@code null}
+   */
+  async updateSheet(spreadsheetId, sheetName, worksheetData, create = true) {
+    try {
+      const sheets = google.sheets({
+        version: 'v4',
+        auth: this.auth,
+      });
+
+      // Check if the sheet already exists
+      const spreadsheetInfo = await sheets.spreadsheets.get({ spreadsheetId });
+
+      const sheetExists = spreadsheetInfo.data.sheets.some(
+        (sheet) => sheet.properties.title === sheetName,
+      );
+
+      let sheetId;
+
+      if (!sheetExists) {
+        // Create a new sheet if it doesn't exist and the 'create' flag is true
+        if (!create) {
+          this.log.info('Sheet does not exists and not creating, nothing to do.');
+          return null;
+        }
+
+        const createResponse = await sheets.spreadsheets.batchUpdate({
+          spreadsheetId,
+          requestBody: {
+            requests: [
+              {
+                addSheet: {
+                  properties: {
+                    title: sheetName,
+                  },
+                },
+              },
+            ],
+          },
+        });
+
+        // Get the sheet ID of the newly created sheet
+        sheetId = createResponse.data.replies[0].addSheet.properties.sheetId;
+      } else {
+        // Get the sheet ID of the existing sheet
+        const sheetInfo = spreadsheetInfo.data.sheets.find(
+          (sheet) => sheet.properties.title === sheetName,
+        );
+        sheetId = sheetInfo.properties.sheetId;
+      }
+
+      if (Array.isArray(worksheetData) && Array.isArray(worksheetData[0])) {
+        await sheets.spreadsheets.values.update({
+          spreadsheetId,
+          range: `'${sheetName}'`,
+          valueInputOption: 'RAW',
+          resource: {
+            values: worksheetData,
+          },
+        });
+      }
+      return sheetId;
+    } catch (error) {
+      this.log.info(`Error in updating sheet: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   *
+   * @param {string} spreadsheetId
+   * @param {string} sheetName
+   *
+   * @returns void
+   */
+  async deleteGSheet(spreadsheetId, sheetName) {
+    try {
+      const sheets = google.sheets({
+        version: 'v4',
+        auth: this.auth,
+      });
+
+      const sheetsResponse = await sheets.spreadsheets.get({
+        spreadsheetId,
+        ranges: [sheetName],
+        fields: 'sheets.properties.sheetId',
+      });
+
+      const existingSheetId = sheetsResponse.data.sheets[0].properties.sheetId;
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+          requests: [
+            {
+              deleteSheet: {
+                sheetId: existingSheetId,
+              },
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      this.log.info(`Error deleting sheet from spreadsheet: ${error.message}`);
+      throw error;
+    }
+  }
 }
 
 Object.assign(GoogleClient, {
