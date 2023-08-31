@@ -620,15 +620,15 @@ export class GoogleClient {
         (sheet) => sheet.properties.title === sheetName,
       );
 
-      if (!sheetExists && !create) {
-        this.log.info('Sheet does not exists and not creating, nothing to do.');
-        return null;
-      }
-
       let sheetId;
 
-      if (!sheetExists && create) {
+      if (!sheetExists) {
         // Create a new sheet if it doesn't exist and the 'create' flag is true
+        if (!create) {
+          this.log.info('Sheet does not exists and not creating, nothing to do.');
+          return null;
+        }
+
         const createResponse = await sheets.spreadsheets.batchUpdate({
           spreadsheetId,
           requestBody: {
