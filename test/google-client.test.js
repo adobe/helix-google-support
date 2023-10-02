@@ -599,6 +599,7 @@ describe('GoogleClient tests', () => {
         })
         .reply(200, {
           id: '1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys',
+          mimeType: 'application/vnd.google-apps.document',
           name: 'helix-hackathon-part-v',
           modifiedTime: 'Mon, 14 Jun 2021 03:37:28 GMT',
           parents: [
@@ -644,6 +645,7 @@ describe('GoogleClient tests', () => {
         id: '1ZJWJwL9szyTq6B-W0_Y7bFL1Tk1vyym4RyQ7AKXS7Ys',
         lastModified: 1623641848000,
         name: 'helix-hackathon-part-v',
+        mimeType: 'application/vnd.google-apps.document',
         path: '/root/subfolder/helix-hackathon-part-v',
       },
       {
