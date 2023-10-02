@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/adobe/helix-google-support/compare/v2.3.14...v3.0.0) (2023-10-02)
+
+
+### Features
+
+* include item mimeType ([#260](https://github.com/adobe/helix-google-support/issues/260)) ([6bd1a5a](https://github.com/adobe/helix-google-support/commit/6bd1a5ae17719c0eb1afaaa0d896e163a8f29e09))
+
+
+### BREAKING CHANGES
+
+* getItemsFromPath() now includes the mimetype for the items. tests might fail.
+
 ## [2.3.14](https://github.com/adobe/helix-google-support/compare/v2.3.13...v2.3.14) (2023-09-29)
 
 
