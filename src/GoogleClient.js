@@ -265,6 +265,7 @@ export class GoogleClient {
     const pathItem = addFields({
       name,
       path: itemPath,
+      mimeType: item.mimeType,
       id: item.id,
     }, item);
 
