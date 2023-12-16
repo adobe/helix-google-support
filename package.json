@@ -40,16 +40,16 @@
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "c8": "8.0.1",
-    "eslint": "8.55.0",
+    "eslint": "8.56.0",
     "eslint-plugin-header": "3.1.1",
-    "eslint-plugin-import": "2.29.0",
+    "eslint-plugin-import": "2.29.1",
     "husky": "8.0.3",
     "junit-report-builder": "3.1.0",
     "lint-staged": "15.2.0",
     "mocha": "10.2.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.4.0",
-    "semantic-release": "22.0.10"
+    "semantic-release": "22.0.12"
   },
   "lint-staged": {
     "*.js": "eslint",
