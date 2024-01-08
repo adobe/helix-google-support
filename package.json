@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@adobe/helix-onedrive-support": "11.3.4",
-    "googleapis": "129.0.0",
+    "googleapis": "130.0.0",
     "lru-cache": "10.1.0"
   },
   "devDependencies": {
@@ -39,7 +39,7 @@
     "@adobe/eslint-config-helix": "2.0.5",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
-    "c8": "8.0.1",
+    "c8": "9.0.0",
     "eslint": "8.56.0",
     "eslint-plugin-header": "3.1.1",
     "eslint-plugin-import": "2.29.1",
