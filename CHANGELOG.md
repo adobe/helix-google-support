@@ -1,3 +1,10 @@
+## [3.0.27](https://github.com/adobe/helix-google-support/compare/v3.0.26...v3.0.27) (2024-02-05)
+
+
+### Bug Fixes
+
+* **deps:** update dependency googleapis to v132 ([#319](https://github.com/adobe/helix-google-support/issues/319)) ([fbb9b2e](https://github.com/adobe/helix-google-support/commit/fbb9b2e8c5b310c8ebdaf0621ba24153c156bca0))
+
 ## [3.0.26](https://github.com/adobe/helix-google-support/compare/v3.0.25...v3.0.26) (2024-02-04)
 
 
