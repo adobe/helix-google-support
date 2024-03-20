@@ -272,6 +272,7 @@ export class GoogleClient {
     if (children.length) {
       // add parent references not-enumerable to avoid deep structures during serialization
       Object.defineProperty(children[children.length - 1], 'parent', {
+        configurable: true,
         enumerable: false,
         value: pathItem,
       });
