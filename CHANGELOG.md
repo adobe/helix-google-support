@@ -1,3 +1,10 @@
+## [3.0.37](https://github.com/adobe/helix-google-support/compare/v3.0.36...v3.0.37) (2024-03-20)
+
+
+### Bug Fixes
+
+* allow overwriting property parent ([#338](https://github.com/adobe/helix-google-support/issues/338)) ([776695d](https://github.com/adobe/helix-google-support/commit/776695da3c3780d4417716e07eb663c25d368ffb))
+
 ## [3.0.36](https://github.com/adobe/helix-google-support/compare/v3.0.35...v3.0.36) (2024-03-19)
 
 
