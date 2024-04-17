@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-google-support",
-  "version": "3.0.41",
+  "version": "3.0.42",
   "description": "Helix Google Support",
   "main": "src/index.js",
   "type": "module",
