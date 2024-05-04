@@ -36,7 +36,7 @@
     "lru-cache": "10.2.2"
   },
   "devDependencies": {
-    "@adobe/helix-shared-tokencache": "1.4.3",
+    "@adobe/helix-shared-tokencache": "1.4.4",
     "@adobe/eslint-config-helix": "2.0.6",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
