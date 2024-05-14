@@ -1,3 +1,10 @@
+# [3.1.0](https://github.com/adobe/helix-google-support/compare/v3.0.50...v3.1.0) (2024-05-14)
+
+
+### Features
+
+* add getUncachedItemFromId ([#361](https://github.com/adobe/helix-google-support/issues/361)) ([acc94f7](https://github.com/adobe/helix-google-support/commit/acc94f7a75c6c05766314784fb38d077ad962b52))
+
 ## [3.0.50](https://github.com/adobe/helix-google-support/compare/v3.0.49...v3.0.50) (2024-05-14)
 
 
