@@ -121,6 +121,14 @@ declare class GoogleClient {
   getItemFromPath(parentId:string, path:string, type?:string):Promise<DriveItemInfo>;
 
   /**
+   * Returns the (uncached) item for the given id or {@code null} if the item cannot be found.
+   *
+   * @param {string} fileId file id
+   * @returns {Promise<DriveItemInfo>}
+   */
+  getUncachedItemFromId(fileId:string):Promise<DriveItemInfo>;
+
+  /**
    * Returns an (uncached) file directly via the google api
    * @param {string} fileId
    * @returns {Promise<Buffer>} file data
@@ -168,21 +176,21 @@ declare class GoogleClient {
 
 
    /**
-    * 
-    * @param {string} spreadsheetId 
-    * @param {string} sheetName 
-    * @param {object} worksheetData 
-    * 
+    *
+    * @param {string} spreadsheetId
+    * @param {string} sheetName
+    * @param {object} worksheetData
+    *
     * @returns {Promise<string>} sheetId or {@code null}
     */
    updateSheet(spreadsheetId:string, sheetName:string, worksheetData:object, create:boolean):Promise<string>;
 
 
    /**
-    * 
-    * @param spreadsheetId 
+    *
+    * @param spreadsheetId
     * @param sheetName sheetName to delete in the spreadsheet
-    * 
+    *
     * @returns {Promise<void>}
     */
    deleteSheet(spreadsheetId:string, sheetName:string):Promise<void>;

@@ -411,39 +411,22 @@ export class GoogleClient {
    */
   async getItemFromPath(parentId, path, type) {
     if (!path) {
-      try {
-        let item = lru.get(parentId);
+      let item = lru.get(parentId);
+      if (!item) {
+        item = await this.getUncachedItemFromId(parentId);
         if (!item) {
-          const { data } = (await this.drive.files.get({
-            fileId: parentId,
-            fields: [
-              'name',
-              'parents',
-              'mimeType',
-              'modifiedTime',
-            ].join(','),
-            supportsAllDrives: true,
-          }));
-          item = addFields({
-            id: parentId,
-            path: `/${data.name}`,
-          }, data);
-          // todo: extend caching to all items ?
-          Object.defineProperty(item, 'invalidate', {
-            enumerable: false,
-            value() {
-              lru.delete(parentId);
-            },
-          });
-          lru.set(parentId, item);
-        }
-        return item;
-      } catch (e) {
-        if (e.response && e.response.status === 404) {
           return null;
         }
-        throw e;
+        // todo: extend caching to all items ?
+        Object.defineProperty(item, 'invalidate', {
+          enumerable: false,
+          value() {
+            lru.delete(parentId);
+          },
+        });
+        lru.set(parentId, item);
       }
+      return item;
     }
 
     const segs = createPathSegments(path);
@@ -453,6 +436,36 @@ export class GoogleClient {
       return null;
     }
     return item;
+  }
+
+  /**
+   * Returns the (uncached) item for the given id or {@code null} if the item cannot be found.
+   *
+   * @param {string} fileId file id
+   * @returns {Promise<DriveItemInfo>}
+   */
+  async getUncachedItemFromId(fileId) {
+    try {
+      const { data } = (await this.drive.files.get({
+        fileId,
+        fields: [
+          'name',
+          'parents',
+          'mimeType',
+          'modifiedTime',
+        ].join(','),
+        supportsAllDrives: true,
+      }));
+      return addFields({
+        id: fileId,
+        path: `/${data.name}`,
+      }, data);
+    } catch (e) {
+      if (e.response && e.response.status === 404) {
+        return null;
+      }
+      throw e;
+    }
   }
 
   /**
