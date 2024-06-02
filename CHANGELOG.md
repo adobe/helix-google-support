@@ -1,3 +1,10 @@
+## [3.1.4](https://github.com/adobe/helix-google-support/compare/v3.1.3...v3.1.4) (2024-06-02)
+
+
+### Bug Fixes
+
+* **deps:** update adobe fixes ([d9b96f8](https://github.com/adobe/helix-google-support/commit/d9b96f8f6836f463f110b7281d87b880cda7aa96))
+
 ## [3.1.3](https://github.com/adobe/helix-google-support/compare/v3.1.2...v3.1.3) (2024-05-25)
 
 
