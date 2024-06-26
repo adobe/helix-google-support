@@ -34,6 +34,7 @@ describe('GoogleClient tests', () => {
     cachePlugin = new MemCachePlugin({
       caches: new Map(),
       key: 'foobar',
+      type: 'google',
     });
     cachePlugin.caches.set('foobar', {
       data: JSON.stringify({
