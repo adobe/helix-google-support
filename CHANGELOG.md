@@ -1,3 +1,10 @@
+## [3.1.20](https://github.com/adobe/helix-google-support/compare/v3.1.19...v3.1.20) (2024-07-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @adobe/helix-onedrive-support to v11.5.0 ([#390](https://github.com/adobe/helix-google-support/issues/390)) ([4dcedfc](https://github.com/adobe/helix-google-support/commit/4dcedfce42185f5f74ad22adf84bba0b34d0e52c))
+
 ## [3.1.19](https://github.com/adobe/helix-google-support/compare/v3.1.18...v3.1.19) (2024-07-07)
 
 
