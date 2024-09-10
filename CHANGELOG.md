@@ -1,3 +1,10 @@
+## [3.1.36](https://github.com/adobe/helix-google-support/compare/v3.1.35...v3.1.36) (2024-09-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency googleapis to v144 ([#422](https://github.com/adobe/helix-google-support/issues/422)) ([8ea5b39](https://github.com/adobe/helix-google-support/commit/8ea5b397bbb598b8e68b06eb8d502a6fa5ff5dc5))
+
 ## [3.1.35](https://github.com/adobe/helix-google-support/compare/v3.1.34...v3.1.35) (2024-09-08)
 
 
