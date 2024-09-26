@@ -1,3 +1,10 @@
+# [3.2.0](https://github.com/adobe/helix-google-support/compare/v3.1.39...v3.2.0) (2024-09-26)
+
+
+### Features
+
+* allow passing other options to Google API ([#429](https://github.com/adobe/helix-google-support/issues/429)) ([b87724e](https://github.com/adobe/helix-google-support/commit/b87724e41faa9841fe56700bfa0648da54132a52))
+
 ## [3.1.39](https://github.com/adobe/helix-google-support/compare/v3.1.38...v3.1.39) (2024-09-24)
 
 
