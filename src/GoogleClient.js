@@ -130,6 +130,8 @@ export class GoogleClient {
       version: 'v3',
       auth: this.auth,
     });
+
+    this.googleApiOpts = opts.googleApiOpts;
   }
 
   async init() {
@@ -177,7 +179,7 @@ export class GoogleClient {
    * @returns {Promise<DriveItemInfo[]>|null}
    */
   async getUncachedItemsFromSegments(parentId, pathSegments, parentPath, type) {
-    const { log, drive } = this;
+    const { log, drive, googleApiOpts } = this;
     const name = pathSegments.shift();
     const [baseName, ext] = splitByExtension(name);
     const sanitizedName = sanitizeName(baseName);
@@ -193,7 +195,7 @@ export class GoogleClient {
         : 'and mimeType != \'application/vnd.google-apps.folder\'';
     }
 
-    const opts = {
+    const params = {
       q: [
         `'${parentId}' in parents`,
         'and trashed=false',
@@ -207,13 +209,13 @@ export class GoogleClient {
 
     do {
       // eslint-disable-next-line no-await-in-loop
-      const { data } = await drive.files.list(opts);
+      const { data } = await drive.files.list(params, googleApiOpts);
       if (data.nextPageToken) {
-        opts.pageToken = data.nextPageToken;
+        params.pageToken = data.nextPageToken;
       } else {
-        opts.pageToken = null;
+        params.pageToken = null;
       }
-      log.debug(`fetched ${data.files.length} items below ${parentId}. nextPageToken=${opts.pageToken ? '****' : 'null'}`);
+      log.debug(`fetched ${data.files.length} items below ${parentId}. nextPageToken=${params.pageToken ? '****' : 'null'}`);
 
       // find fuzzy match
       data.files.forEach((item) => {
@@ -235,7 +237,7 @@ export class GoogleClient {
         item.fuzzyDistance = editDistance(baseName, itemName);
         items.push(item);
       });
-    } while (opts.pageToken);
+    } while (params.pageToken);
 
     // sort items by edit distance first and 2nd by item name
     items.sort((i0, i1) => {
@@ -338,7 +340,7 @@ export class GoogleClient {
    * @returns {Promise<DriveItemInfo[]>}
    */
   async getItems(fileId, roots) {
-    const { log } = this;
+    const { log, googleApiOpts } = this;
     log.debug(`getItems(${fileId})`);
     const { data } = (await this.drive.files.get({
       fileId,
@@ -349,7 +351,7 @@ export class GoogleClient {
         'modifiedTime',
       ].join(','),
       supportsAllDrives: true,
-    }));
+    }, googleApiOpts));
 
     const root = roots[fileId];
     if (root) {
@@ -455,7 +457,7 @@ export class GoogleClient {
           'modifiedTime',
         ].join(','),
         supportsAllDrives: true,
-      }));
+      }, this.googleApiOpts));
       return addFields({
         id: fileId,
         path: `/${data.name}`,
@@ -479,7 +481,7 @@ export class GoogleClient {
         fileId,
         alt: 'media',
         supportsAllDrives: true,
-      }, { responseType: 'arraybuffer' });
+      }, { ...(this.googleApiOpts || {}), responseType: 'arraybuffer' });
       return Buffer.from(res.data);
     } catch (e) {
       if (e.response && e.response.status === 404) {
@@ -604,7 +606,7 @@ export class GoogleClient {
 
       const response = await this.drive.files.create({
         requestBody,
-      });
+      }, this.googleApiOpts);
 
       return response.data;
     } catch (e) {
