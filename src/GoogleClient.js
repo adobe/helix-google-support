@@ -131,7 +131,7 @@ export class GoogleClient {
       auth: this.auth,
     });
 
-    this.googleApiOpts = opts.googleApiOpts || {};
+    this.googleApiOpts = opts.googleApiOpts;
   }
 
   async init() {
@@ -481,7 +481,7 @@ export class GoogleClient {
         fileId,
         alt: 'media',
         supportsAllDrives: true,
-      }, { ...this.googleApiOpts, responseType: 'arraybuffer' });
+      }, { ...(this.googleApiOpts || {}), responseType: 'arraybuffer' });
       return Buffer.from(res.data);
     } catch (e) {
       if (e.response && e.response.status === 404) {
