@@ -33,7 +33,7 @@
   "dependencies": {
     "@adobe/helix-onedrive-support": "11.5.21",
     "googleapis": "144.0.0",
-    "lru-cache": "11.0.1"
+    "lru-cache": "11.0.2"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.8",
@@ -47,7 +47,7 @@
     "husky": "9.1.6",
     "junit-report-builder": "5.1.1",
     "lint-staged": "15.2.10",
-    "mocha": "10.7.3",
+    "mocha": "10.8.2",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.5.5",
     "semantic-release": "24.2.0"
