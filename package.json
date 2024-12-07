@@ -34,7 +34,7 @@
     "reporter-options": "configFile=.mocha-multi.json"
   },
   "dependencies": {
-    "@adobe/helix-shared-string": "2.1.0",
+    "@adobe/helix-shared-string": "^2.1.0",
     "googleapis": "144.0.0",
     "lru-cache": "11.0.2"
   },
