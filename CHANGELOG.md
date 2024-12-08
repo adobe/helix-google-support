@@ -1,3 +1,10 @@
+## [3.2.13](https://github.com/adobe/helix-google-support/compare/v3.2.12...v3.2.13) (2024-12-08)
+
+
+### Bug Fixes
+
+* use string functions in helix-shared ([#461](https://github.com/adobe/helix-google-support/issues/461)) ([72dcde5](https://github.com/adobe/helix-google-support/commit/72dcde5934d8bb6a972329f5fb1529a4525b3e9c))
+
 ## [3.2.12](https://github.com/adobe/helix-google-support/compare/v3.2.11...v3.2.12) (2024-12-05)
 
 
