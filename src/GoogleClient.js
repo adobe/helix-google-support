@@ -13,9 +13,9 @@ import { LRUCache } from 'lru-cache';
 import { google } from 'googleapis';
 import {
   editDistance, sanitizeName, splitByExtension,
-} from '@adobe/helix-onedrive-support/utils';
-import { StatusCodeError } from '@adobe/helix-onedrive-support';
+} from '@adobe/helix-shared-string';
 import { GoogleTokenCache } from './GoogleTokenCache.js';
+import { StatusCodeError } from './StatusCodeError.js';
 
 let lru = new LRUCache({ max: 1000, ttl: 60000 });
 

@@ -25,15 +25,18 @@
   },
   "homepage": "https://github.com/adobe/helix-google-support#readme",
   "mocha": {
-    "require": "test/setup-env.js",
+    "require": [
+      "test/setup-env.js",
+      "mocha-suppress-logs"
+    ],
     "recursive": "true",
     "reporter": "mocha-multi-reporters",
     "reporter-options": "configFile=.mocha-multi.json"
   },
   "dependencies": {
-    "@adobe/helix-onedrive-support": "11.5.29",
-    "googleapis": "144.0.0",
-    "lru-cache": "11.0.2"
+    "@adobe/helix-shared-string": "^2.1.0",
+    "googleapis": "^144.0.0",
+    "lru-cache": "^11.0.2"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.8",
@@ -49,6 +52,7 @@
     "lint-staged": "15.2.10",
     "mocha": "11.0.1",
     "mocha-multi-reporters": "1.5.1",
+    "mocha-suppress-logs": "0.5.1",
     "nock": "13.5.6",
     "semantic-release": "24.2.0"
   },
