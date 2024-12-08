@@ -35,8 +35,8 @@
   },
   "dependencies": {
     "@adobe/helix-shared-string": "^2.1.0",
-    "googleapis": "144.0.0",
-    "lru-cache": "11.0.2"
+    "googleapis": "^144.0.0",
+    "lru-cache": "^11.0.2"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.8",
