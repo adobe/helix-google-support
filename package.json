@@ -39,7 +39,7 @@
     "lru-cache": "^11.0.2"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "2.0.8",
+    "@adobe/eslint-config-helix": "2.0.9",
     "@adobe/helix-shared-tokencache": "1.4.45",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
