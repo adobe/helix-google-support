@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@adobe/helix-shared-string": "^2.1.0",
-    "googleapis": "^146.0.0",
+    "googleapis": "^148.0.0",
     "lru-cache": "^11.0.2"
   },
   "devDependencies": {
