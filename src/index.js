@@ -11,3 +11,4 @@
  */
 export { GoogleClient } from './GoogleClient.js';
 export { GoogleTokenCache } from './GoogleTokenCache.js';
+export { google } from './google.js';

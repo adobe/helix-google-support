@@ -10,12 +10,12 @@
  * governing permissions and limitations under the License.
  */
 import { LRUCache } from 'lru-cache';
-import { google } from 'googleapis';
 import {
   editDistance, sanitizeName, splitByExtension,
 } from '@adobe/helix-shared-string';
 import { GoogleTokenCache } from './GoogleTokenCache.js';
 import { StatusCodeError } from './StatusCodeError.js';
+import { google } from './google.js';
 
 let lru = new LRUCache({ max: 1000, ttl: 60000 });
 
