@@ -10,12 +10,23 @@
  * governing permissions and limitations under the License.
  */
 import { LRUCache } from 'lru-cache';
-import { google } from 'googleapis';
+import { AuthPlus } from 'googleapis-common';
+import googleDocs from 'googleapis/build/src/apis/docs/v1.js';
+import googleDrive from 'googleapis/build/src/apis/drive/v3.js';
+import googleSheets from 'googleapis/build/src/apis/sheets/v4.js';
+
 import {
   editDistance, sanitizeName, splitByExtension,
 } from '@adobe/helix-shared-string';
 import { GoogleTokenCache } from './GoogleTokenCache.js';
 import { StatusCodeError } from './StatusCodeError.js';
+
+const google = {
+  auth: new AuthPlus(),
+  docs: (opts) => new googleDocs.docs_v1.Docs(opts),
+  drive: (opts) => new googleDrive.drive_v3.Drive(opts),
+  sheets: (opts) => new googleSheets.sheets_v4.Sheets(opts),
+};
 
 let lru = new LRUCache({ max: 1000, ttl: 60000 });
 

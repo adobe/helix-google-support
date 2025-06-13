@@ -9,5 +9,19 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import { AuthPlus } from 'googleapis-common';
+import googleDocs from 'googleapis/build/src/apis/docs/v1.js';
+import googleDrive from 'googleapis/build/src/apis/drive/v3.js';
+import googleSheets from 'googleapis/build/src/apis/sheets/v4.js';
+
 export { GoogleClient } from './GoogleClient.js';
 export { GoogleTokenCache } from './GoogleTokenCache.js';
+
+const google = {
+  auth: new AuthPlus(),
+  docs: (opts) => new googleDocs.docs_v1.Docs(opts),
+  drive: (opts) => new googleDrive.drive_v3.Drive(opts),
+  sheets: (opts) => new googleSheets.sheets_v4.Sheets(opts),
+};
+
+export { google };
