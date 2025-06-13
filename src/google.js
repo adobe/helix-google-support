@@ -14,11 +14,17 @@ import googleDocs from 'googleapis/build/src/apis/docs/v1.js';
 import googleDrive from 'googleapis/build/src/apis/drive/v3.js';
 import googleSheets from 'googleapis/build/src/apis/sheets/v4.js';
 
+function stripVersion(opts) {
+  // eslint-disable-next-line no-param-reassign
+  delete opts.version;
+  return opts;
+}
+
 const google = {
   auth: new AuthPlus(),
-  docs: (opts) => new googleDocs.docs_v1.Docs(opts),
-  drive: (opts) => new googleDrive.drive_v3.Drive(opts),
-  sheets: (opts) => new googleSheets.sheets_v4.Sheets(opts),
+  docs: (opts) => new googleDocs.docs_v1.Docs(stripVersion(opts)),
+  drive: (opts) => new googleDrive.drive_v3.Drive(stripVersion(opts)),
+  sheets: (opts) => new googleSheets.sheets_v4.Sheets(stripVersion(opts)),
 };
 
 export { google };
