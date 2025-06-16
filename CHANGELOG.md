@@ -1,3 +1,10 @@
+# [3.3.0](https://github.com/adobe/helix-google-support/compare/v3.2.17...v3.3.0) (2025-06-16)
+
+
+### Features
+
+* export google objects ([#493](https://github.com/adobe/helix-google-support/issues/493)) ([24d1e6f](https://github.com/adobe/helix-google-support/commit/24d1e6f80c3243a2a7514b74969fec02dbdd7ae6))
+
 ## [3.2.17](https://github.com/adobe/helix-google-support/compare/v3.2.16...v3.2.17) (2025-05-26)
 
 
