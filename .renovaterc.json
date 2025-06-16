@@ -1,3 +1,9 @@
 {
-  "extends": ["github>adobe/helix-shared", ":disableDigestUpdates"]
+  "extends": ["github>adobe/helix-shared", ":disableDigestUpdates"],
+  "packageRules": [
+    {
+      "packageNames": ["googleapis"],
+      "allowedVersions": "<150"
+    },
+  ]
 }
