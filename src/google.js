@@ -10,23 +10,25 @@
  * governing permissions and limitations under the License.
  */
 import { AuthPlus } from 'googleapis-common';
-import googleDocs from 'googleapis/build/src/apis/docs/v1.js';
-import googleDrive from 'googleapis/build/src/apis/drive/v3.js';
-import googleSheets from 'googleapis/build/src/apis/sheets/v4.js';
-import googleOAuth2 from 'googleapis/build/src/apis/oauth2/v2.js';
+import googleDocs from 'googleapis/build/src/apis/docs/index.js';
+import googleDrive from 'googleapis/build/src/apis/drive/index.js';
+import googleSheets from 'googleapis/build/src/apis/sheets/index.js';
+import googleOAuth2 from 'googleapis/build/src/apis/oauth2/index.js';
 
-function stripVersion(opts) {
+function apiVersion(api, opts) {
+  const ctor = api.VERSIONS[opts.version];
   // eslint-disable-next-line no-param-reassign
   delete opts.version;
-  return opts;
+  // eslint-disable-next-line new-cap
+  return new ctor(opts);
 }
 
 const google = {
   auth: new AuthPlus(),
-  oauth2: (opts) => new googleOAuth2.oauth2_v2.Oauth2(stripVersion(opts)),
-  docs: (opts) => new googleDocs.docs_v1.Docs(stripVersion(opts)),
-  drive: (opts) => new googleDrive.drive_v3.Drive(stripVersion(opts)),
-  sheets: (opts) => new googleSheets.sheets_v4.Sheets(stripVersion(opts)),
+  oauth2: (opts) => apiVersion(googleOAuth2, opts),
+  docs: (opts) => apiVersion(googleDocs, opts),
+  drive: (opts) => apiVersion(googleDrive, opts),
+  sheets: (opts) => apiVersion(googleSheets, opts),
 };
 
 export { google };
