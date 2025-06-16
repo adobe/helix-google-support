@@ -1,3 +1,10 @@
+## [3.3.1](https://github.com/adobe/helix-google-support/compare/v3.3.0...v3.3.1) (2025-06-16)
+
+
+### Bug Fixes
+
+* make `googleapis` import exact ([bde5ec1](https://github.com/adobe/helix-google-support/commit/bde5ec16538ba2634ac77dab716a2d8e0b99af41))
+
 # [3.3.0](https://github.com/adobe/helix-google-support/compare/v3.2.17...v3.3.0) (2025-06-16)
 
 
