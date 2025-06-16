@@ -10,11 +10,19 @@
  * governing permissions and limitations under the License.
  */
 import { AuthPlus } from 'googleapis-common';
-import googleDocs from 'googleapis/build/src/apis/docs/index.js';
-import googleDrive from 'googleapis/build/src/apis/drive/index.js';
-import googleSheets from 'googleapis/build/src/apis/sheets/index.js';
-import googleOAuth2 from 'googleapis/build/src/apis/oauth2/index.js';
+import docs from 'googleapis/build/src/apis/docs/index.js';
+import drive from 'googleapis/build/src/apis/drive/index.js';
+import sheets from 'googleapis/build/src/apis/sheets/index.js';
+import oauth2 from 'googleapis/build/src/apis/oauth2/index.js';
 
+/**
+ * Given an API object exposing a `VERSIONS` property, return the appropriate instance
+ * of that API based on the `version` property in options.
+ *
+ * @param {any} api API object exposing a `VERSIONS` property.
+ * @param {object} opts options
+ * @returns API instance
+ */
 function apiVersion(api, opts) {
   const ctor = api.VERSIONS[opts.version];
   // eslint-disable-next-line no-param-reassign
@@ -25,10 +33,10 @@ function apiVersion(api, opts) {
 
 const google = {
   auth: new AuthPlus(),
-  oauth2: (opts) => apiVersion(googleOAuth2, opts),
-  docs: (opts) => apiVersion(googleDocs, opts),
-  drive: (opts) => apiVersion(googleDrive, opts),
-  sheets: (opts) => apiVersion(googleSheets, opts),
+  oauth2: (opts) => apiVersion(oauth2, opts),
+  docs: (opts) => apiVersion(docs, opts),
+  drive: (opts) => apiVersion(drive, opts),
+  sheets: (opts) => apiVersion(sheets, opts),
 };
 
 export { google };
