@@ -72,7 +72,7 @@ function getCacheKey(parentId, pathSegments, type = 'file') {
  * @returns processed error
  */
 function processError(e) {
-  if (/^Request failed with status code /.test(e.message) && e?.response?.data?.error?.message) {
+  if (/^Request failed with status code /.test(e.message) && e.response?.data?.error?.message) {
     e.message = e.response.data.error.message;
   }
   return e;
