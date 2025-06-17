@@ -1,3 +1,10 @@
+## [3.3.2](https://github.com/adobe/helix-google-support/compare/v3.3.1...v3.3.2) (2025-06-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency googleapis-common to v8 ([#492](https://github.com/adobe/helix-google-support/issues/492)) ([75c0148](https://github.com/adobe/helix-google-support/commit/75c01485a9fa8593015fb2f85d583a855ee5e281))
+
 ## [3.3.1](https://github.com/adobe/helix-google-support/compare/v3.3.0...v3.3.1) (2025-06-16)
 
 
