@@ -65,6 +65,20 @@ function getCacheKey(parentId, pathSegments, type = 'file') {
 }
 
 /**
+ * Replaces a generic error message `Request failed with status code ...` with
+ * a more descriptive one found in the response itself.
+ *
+ * @param {Error} e error
+ * @returns processed error
+ */
+function processError(e) {
+  if (/^Request failed with status code /.test(e.message) && e.response?.data?.error?.message) {
+    e.message = e.response.data.error.message;
+  }
+  return e;
+}
+
+/**
  * Google auth client
  */
 export class GoogleClient {
@@ -393,12 +407,13 @@ export class GoogleClient {
     try {
       return await this.getItems(fileId, roots);
     } catch (e) {
-      if (e.response && e.response.status === 404) {
+      const err = processError(e);
+      if (err.response && err.response.status === 404) {
         log.info(`unable to get items for ${fileId}. Not found`);
         return [];
       }
-      log.warn(`unable to get items for ${fileId}. ${e}`);
-      throw e;
+      log.warn(`unable to get items for ${fileId}. ${err}`);
+      throw err;
     }
   }
 
@@ -463,10 +478,11 @@ export class GoogleClient {
         path: `/${data.name}`,
       }, data);
     } catch (e) {
-      if (e.response && e.response.status === 404) {
+      const err = processError(e);
+      if (err.response && err.response.status === 404) {
         return null;
       }
-      throw e;
+      throw err;
     }
   }
 
@@ -484,15 +500,16 @@ export class GoogleClient {
       }, { ...(this.googleApiOpts || {}), responseType: 'arraybuffer' });
       return Buffer.from(res.data);
     } catch (e) {
-      if (e.response && e.response.status === 404) {
+      const err = processError(e);
+      if (err.response && err.response.status === 404) {
         throw new StatusCodeError(`Not Found: ${fileId}`, 404);
       }
       // convert message to string
       /* c8 ignore next 3 */
-      if (e.message instanceof ArrayBuffer) {
-        e.message = Buffer.from(e.message).toString('utf-8');
+      if (err.message instanceof ArrayBuffer) {
+        err.message = Buffer.from(err.message).toString('utf-8');
       }
-      throw e;
+      throw err;
     }
   }
 
@@ -516,6 +533,7 @@ export class GoogleClient {
       return await this.getFile(item.id);
     } catch (e) {
       if (e.statusCode === 404) {
+        // this is a StatusCodeError we threw ourselves in `getFile`
         if (noRetry) {
           return null;
         }
@@ -542,10 +560,11 @@ export class GoogleClient {
       const res = await docs.documents.get({ documentId });
       return res.data;
     } catch (e) {
-      if (e.response && e.response.status === 404) {
+      const err = processError(e);
+      if (err.response && err.response.status === 404) {
         throw new StatusCodeError(`Not Found: ${documentId}`, 404);
       }
-      throw e;
+      throw err;
     }
   }
 
@@ -568,6 +587,7 @@ export class GoogleClient {
       return await this.getDocument(item.id);
     } catch (e) {
       if (e.statusCode === 404) {
+        // this is a StatusCodeError we threw ourselves in `getDocument`
         if (noRetry) {
           return null;
         }
@@ -611,7 +631,7 @@ export class GoogleClient {
       return response.data;
     } catch (e) {
       this.log.info(`Error creating file ${name}`);
-      throw e;
+      throw processError(e);
     }
   }
 
@@ -682,9 +702,9 @@ export class GoogleClient {
         });
       }
       return sheetId;
-    } catch (error) {
-      this.log.info(`Error in updating sheet: ${error.message}`);
-      throw error;
+    } catch (e) {
+      this.log.info(`Error in updating sheet: ${e.message}`);
+      throw processError(e);
     }
   }
 
@@ -721,9 +741,9 @@ export class GoogleClient {
           ],
         },
       });
-    } catch (error) {
-      this.log.info(`Error deleting sheet from spreadsheet: ${error.message}`);
-      throw error;
+    } catch (e) {
+      this.log.info(`Error deleting sheet from spreadsheet: ${e.message}`);
+      throw processError(e);
     }
   }
 }
