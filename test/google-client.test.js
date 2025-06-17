@@ -478,7 +478,6 @@ describe('GoogleClient tests', () => {
           client_secret: 'fake',
           redirect_uri: 'https://localhost:8000',
           grant_type: 'authorization_code',
-          code_verifier: '',
         });
         return [200, {
           access_token: 'dummy-access',
