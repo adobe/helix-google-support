@@ -114,11 +114,11 @@ export class GoogleClient {
       auth = new google.auth.OAuth2();
       auth.setCredentials({ access_token: `${opts.token}` });
     } else {
-      auth = new google.auth.OAuth2(
-        opts.clientId,
-        opts.clientSecret,
-        opts.redirectUri,
-      );
+      auth = new google.auth.OAuth2({
+        clientId: opts.clientId,
+        clientSecret: opts.clientSecret,
+        redirectUri: opts.redirectUri,
+      });
     }
     Object.assign(this, {
       log: opts.log,
