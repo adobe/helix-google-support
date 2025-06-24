@@ -59,6 +59,20 @@ describe('GoogleClient tests', () => {
     assert.strictEqual(GoogleClient.id2Url('gdrive:foobar'), 'gdrive:foobar');
   });
 
+  describe('generic tests', () => {
+    it('create GoogleClient with just redirect URI', async () => {
+      const redirectUri = 'http://localhost:3000/';
+      const client = await new GoogleClient({ redirectUri }).init();
+      const { auth } = client;
+
+      assert.strictEqual(auth.redirectUri, redirectUri);
+      const url = await client.generateAuthUrl();
+      const { searchParams } = new URL(url);
+      assert.strictEqual(searchParams.get('redirect_uri'), redirectUri);
+      assert.strictEqual(searchParams.get('client_id'), '');
+    });
+  });
+
   describe('getItemsFromPath tests', () => {
     it('getItemsFromPath returns item hierarchy', async () => {
       nock.loginGoogle(4);
