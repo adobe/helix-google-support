@@ -1,3 +1,10 @@
+## [3.3.3](https://github.com/adobe/helix-google-support/compare/v3.3.2...v3.3.3) (2025-06-24)
+
+
+### Bug Fixes
+
+* arguments to OAuth2 should be passed as object ([#498](https://github.com/adobe/helix-google-support/issues/498)) ([7d7ffff](https://github.com/adobe/helix-google-support/commit/7d7ffff5328ab0764fdb1bf613a60a580989db73))
+
 ## [3.3.2](https://github.com/adobe/helix-google-support/compare/v3.3.1...v3.3.2) (2025-06-17)
 
 
