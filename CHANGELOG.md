@@ -1,3 +1,10 @@
+## [3.3.4](https://github.com/adobe/helix-google-support/compare/v3.3.3...v3.3.4) (2025-09-08)
+
+
+### Bug Fixes
+
+* **deps:** update dependency lru-cache to v11.2.1 ([#509](https://github.com/adobe/helix-google-support/issues/509)) ([8fcc136](https://github.com/adobe/helix-google-support/commit/8fcc1366f4c4ea35f9989ec8d88b58415e9d0103))
+
 ## [3.3.3](https://github.com/adobe/helix-google-support/compare/v3.3.2...v3.3.3) (2025-06-24)
 
 
