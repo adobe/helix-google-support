@@ -409,7 +409,7 @@ export class GoogleClient {
     } catch (e) {
       const err = processError(e);
       if (err.response && err.response.status === 404) {
-        log.info(`unable to get items for ${fileId}. Not found`);
+        log.debug(`unable to get items for ${fileId}. Not found`);
         return [];
       }
       log.warn(`unable to get items for ${fileId}. ${err}`);
