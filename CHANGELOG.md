@@ -1,3 +1,10 @@
+## [3.3.5](https://github.com/adobe/helix-google-support/compare/v3.3.4...v3.3.5) (2025-09-16)
+
+
+### Bug Fixes
+
+* decrease log level for not found ([#512](https://github.com/adobe/helix-google-support/issues/512)) ([691b0b6](https://github.com/adobe/helix-google-support/commit/691b0b681f4af82ec9d5cc51e5133186c44cec34))
+
 ## [3.3.4](https://github.com/adobe/helix-google-support/compare/v3.3.3...v3.3.4) (2025-09-08)
 
 
