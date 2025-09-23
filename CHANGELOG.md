@@ -1,3 +1,15 @@
+# [4.0.0](https://github.com/adobe/helix-google-support/compare/v3.3.5...v4.0.0) (2025-09-23)
+
+
+### Bug Fixes
+
+* stop finding item author-friendly after 1000 hits ([#513](https://github.com/adobe/helix-google-support/issues/513)) ([d21c9c5](https://github.com/adobe/helix-google-support/commit/d21c9c57025f9289c52e30ec24d14515f0e0af6e))
+
+
+### BREAKING CHANGES
+
+* flat hierarchies no longer support author-friendly search
+
 ## [3.3.5](https://github.com/adobe/helix-google-support/compare/v3.3.4...v3.3.5) (2025-09-16)
 
 
