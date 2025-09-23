@@ -75,7 +75,7 @@ describe('GoogleClient tests', () => {
 
   describe('getItemsFromPath tests', () => {
     it('getItemsFromPath returns item hierarchy', async () => {
-      nock.loginGoogle(4);
+      nock.loginGoogle(3);
       nock('https://www.googleapis.com')
         .get('/drive/v3/files')
         .query({
@@ -117,21 +117,14 @@ describe('GoogleClient tests', () => {
             id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUw',
             modifiedTime: 'Sat, 15 Feb 2031 06:59:41 GMT',
             size: 1234,
-          }],
-          nextPageToken: 'fake-next-token',
-        })
-        .get('/drive/v3/files')
-        .query({
-          q: '\'124\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
-          ...DEFAULT_LIST_OPTS,
-          pageToken: 'fake-next-token',
-        })
-        .reply(200, {
-          files: [{
+          }, {
             mimeType: 'application/vnd.google-apps.sheets',
             name: 'Structure',
-            id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUx',
+            id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUw',
+            modifiedTime: 'Sat, 15 Feb 2031 06:59:41 GMT',
+            size: 1234,
           }],
+          nextPageToken: 'fake-next-token',
         });
 
       const client = await new GoogleClient({
@@ -225,7 +218,7 @@ describe('GoogleClient tests', () => {
 
   describe('getItemFromPath tests', () => {
     it('getItemFromPath returns item', async () => {
-      nock.loginGoogle(8);
+      nock.loginGoogle(6);
       nock('https://www.googleapis.com')
         .get('/drive/v3/files')
         .twice() // second time after item was removed from the cache
@@ -271,20 +264,6 @@ describe('GoogleClient tests', () => {
             modifiedTime: 'Sat, 15 Feb 2031 06:59:41 GMT',
           }],
           nextPageToken: 'fake-next-token',
-        })
-        .get('/drive/v3/files')
-        .twice() // second time after item was removed from the cache
-        .query({
-          q: '\'124\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
-          ...DEFAULT_LIST_OPTS,
-          pageToken: 'fake-next-token',
-        })
-        .reply(200, {
-          files: [{
-            mimeType: 'application/vnd.google-apps.sheets',
-            name: 'Structure',
-            id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUx',
-          }],
         });
 
       const client = await new GoogleClient({
@@ -319,7 +298,62 @@ describe('GoogleClient tests', () => {
       assert.notStrictEqual(item, item3);
     });
 
-    it('getItemFromPath return null for not existing', async () => {
+    it('getItemFromPath returns item directly if author-friendly is not available', async () => {
+      nock.loginGoogle(2);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP\' in parents and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.sheets',
+            name: 'other',
+            id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUw',
+            modifiedTime: 'Sat, 15 Feb 2031 06:59:41 GMT',
+          }],
+          nextPageToken: 'fake-next-token',
+        })
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP\' in parents and name = \'page\' and trashed=false and mimeType != \'application/vnd.google-apps.folder\'',
+          fields: 'files(id, name, mimeType, modifiedTime, size)',
+          pageSize: 1,
+          includeItemsFromAllDrives: 'true',
+          supportsAllDrives: 'true',
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.sheets',
+            name: 'page',
+            id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUx',
+            modifiedTime: 'Sat, 15 Feb 2031 06:59:41 GMT',
+          }],
+        });
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      const item = await client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP', '/page');
+      const {
+        lastModified,
+        ...actual
+      } = item;
+      assert.ok(lastModified);
+      assert.deepStrictEqual(actual, {
+        id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUx',
+        name: 'page',
+        path: '/page',
+        mimeType: 'application/vnd.google-apps.sheets',
+      });
+    });
+
+    it('getItemFromPath return null for not existing in listing', async () => {
       nock.loginGoogle(2);
       nock('https://www.googleapis.com')
         .get('/drive/v3/files')
@@ -351,6 +385,46 @@ describe('GoogleClient tests', () => {
       }).init();
 
       const item = await client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP', '/deeply/nested/missing');
+      assert.deepStrictEqual(item, null);
+    });
+
+    it('getItemFromPath return null for not existing directly', async () => {
+      nock.loginGoogle(2);
+      nock('https://www.googleapis.com')
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP\' in parents and trashed=false and mimeType = \'application/vnd.google-apps.sheets\'',
+          ...DEFAULT_LIST_OPTS,
+        })
+        .reply(200, {
+          files: [{
+            mimeType: 'application/vnd.google-apps.sheets',
+            name: 'other',
+            id: '1jXZBaOHP9x9-2NiYPbeyiWOHbmDRKobIeb11JdCVyUw',
+            modifiedTime: 'Sat, 15 Feb 2031 06:59:41 GMT',
+          }],
+          nextPageToken: 'fake-next-token',
+        })
+        .get('/drive/v3/files')
+        .query({
+          q: '\'1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP\' in parents and name = \'page\' and trashed=false and mimeType = \'application/vnd.google-apps.sheets\'',
+          fields: 'files(id, name, mimeType, modifiedTime, size)',
+          pageSize: 1,
+          includeItemsFromAllDrives: 'true',
+          supportsAllDrives: 'true',
+        })
+        .reply(200, {
+          files: [],
+        });
+
+      const client = await new GoogleClient({
+        log: console,
+        clientId: 'fake',
+        clientSecret: 'fake',
+        cachePlugin,
+      }).init();
+
+      const item = await client.getItemFromPath('1bH7_28a1-Q3QEEvFhT9eTmR-D7_9F4xP', '/page', 'application/vnd.google-apps.sheets');
       assert.deepStrictEqual(item, null);
     });
 
