@@ -186,29 +186,23 @@ export class GoogleClient {
   }
 
   /**
-   * @param {string} parentId
-   * @param {string[]} pathSegments
-   * @param {string} parentPath
-   * @param {string} [type] optional file mimetype
-   * @returns {Promise<DriveItemInfo[]>|null}
+   * Get a child item given its base name and extension in an author
+   * friendly way.
+   *
+   * @param {String} parentId parent id
+   * @param {String} basename base name
+   * @param {String} ext extension
+   * @param {String} type mime type of the child
+   * @returns {Object} containing item and whether more than 1000 items were found
    */
-  async getUncachedItemsFromSegments(parentId, pathSegments, parentPath, type) {
+  async #fuzzyGetChild(parentId, basename, ext, type) {
     const { log, drive, googleApiOpts } = this;
-    const name = pathSegments.shift();
-    const [baseName, ext] = splitByExtension(name);
-    const sanitizedName = sanitizeName(baseName);
-
+    const sanitizedName = sanitizeName(basename);
     const items = [];
-    let mimeTypeFilter;
-    // filter for folder if path continues
-    if (pathSegments.length) {
-      mimeTypeFilter = 'and mimeType = \'application/vnd.google-apps.folder\'';
-    } else {
-      mimeTypeFilter = type
-        ? `and mimeType = '${type}'`
-        : 'and mimeType != \'application/vnd.google-apps.folder\'';
-    }
 
+    const mimeTypeFilter = type
+      ? `and mimeType = '${type}'`
+      : 'and mimeType != \'application/vnd.google-apps.folder\'';
     const params = {
       q: [
         `'${parentId}' in parents`,
@@ -221,37 +215,29 @@ export class GoogleClient {
       pageSize: 1000,
     };
 
-    do {
-      // eslint-disable-next-line no-await-in-loop
-      const { data } = await drive.files.list(params, googleApiOpts);
-      if (data.nextPageToken) {
-        params.pageToken = data.nextPageToken;
-      } else {
-        params.pageToken = null;
-      }
-      log.debug(`fetched ${data.files.length} items below ${parentId}. nextPageToken=${params.pageToken ? '****' : 'null'}`);
+    const { data } = await drive.files.list(params, googleApiOpts);
+    log.debug(`fetched ${data.files.length} items below ${parentId}`);
 
-      // find fuzzy match
-      data.files.forEach((item) => {
-        const [itemName, itemExt] = splitByExtension(item.name);
-        // remember extension
-        // eslint-disable-next-line no-param-reassign
-        item.extension = itemExt;
-        /* c8 ignore next 4 */
-        if (ext && ext !== itemExt) {
-          // only match extension if given via relPath
-          return;
-        }
-        const sanitizedItemName = sanitizeName(itemName);
-        if (sanitizedItemName !== sanitizedName) {
-          return;
-        }
-        // compute edit distance
-        // eslint-disable-next-line no-param-reassign
-        item.fuzzyDistance = editDistance(baseName, itemName);
-        items.push(item);
-      });
-    } while (params.pageToken);
+    // find fuzzy match
+    data.files.forEach((item) => {
+      const [itemName, itemExt] = splitByExtension(item.name);
+      // remember extension
+      // eslint-disable-next-line no-param-reassign
+      item.extension = itemExt;
+      /* c8 ignore next 4 */
+      if (ext && ext !== itemExt) {
+        // only match extension if given via relPath
+        return;
+      }
+      const sanitizedItemName = sanitizeName(itemName);
+      if (sanitizedItemName !== sanitizedName) {
+        return;
+      }
+      // compute edit distance
+      // eslint-disable-next-line no-param-reassign
+      item.fuzzyDistance = editDistance(basename, itemName);
+      items.push(item);
+    });
 
     // sort items by edit distance first and 2nd by item name
     items.sort((i0, i1) => {
@@ -264,7 +250,69 @@ export class GoogleClient {
     });
 
     const [item] = items;
+    return {
+      item,
+      tooManyResults: !!data.nextPageToken,
+    };
+  }
 
+  /**
+   * Gets a child directly by looking for its name in a parent folder.
+   *
+   * @param {String} parentId parent Id
+   * @param {String} name child name
+   * @param {String} type child mime type
+   * @returns {Object} item or null
+   */
+  async #getChild(parentId, name, type) {
+    const { drive, googleApiOpts } = this;
+
+    const mimeTypeFilter = type
+      ? `and mimeType = '${type}'`
+      : 'and mimeType != \'application/vnd.google-apps.folder\'';
+    const params = {
+      q: [
+        `'${parentId}' in parents`,
+        `and name = '${name}'`,
+        'and trashed=false',
+        mimeTypeFilter,
+      ].join(' '),
+      fields: 'files(id, name, mimeType, modifiedTime, size)',
+      includeItemsFromAllDrives: true,
+      supportsAllDrives: true,
+      pageSize: 1,
+    };
+
+    const { data } = await drive.files.list(params, googleApiOpts);
+    if (data.files.length !== 1) {
+      return null;
+    }
+    const [item] = data.files;
+    const [, itemExt] = splitByExtension(item.name);
+    item.extension = itemExt;
+    return item;
+  }
+
+  /**
+   * @param {string} parentId
+   * @param {string[]} pathSegments
+   * @param {string} parentPath
+   * @param {string} [type] optional file mimetype
+   * @returns {Promise<DriveItemInfo[]>|null}
+   */
+  async getUncachedItemsFromSegments(parentId, pathSegments, parentPath, type) {
+    const name = pathSegments.shift();
+    const [basename, ext] = splitByExtension(name);
+    const sanitizedName = sanitizeName(basename);
+    const childType = pathSegments.length
+      ? 'application/vnd.google-apps.folder'
+      : type;
+
+    const ret = await this.#fuzzyGetChild(parentId, basename, ext, childType);
+    let { item } = ret;
+    if (!item && ret.tooManyResults) {
+      item = await this.#getChild(parentId, name, childType);
+    }
     if (!item) {
       return null;
     }
