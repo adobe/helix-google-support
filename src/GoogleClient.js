@@ -193,7 +193,7 @@ export class GoogleClient {
    * @param {String} basename base name
    * @param {String} ext extension
    * @param {String} type mime type of the child
-   * @returns {Object} containing item and whether more than 1000 items were found
+   * @returns {Promise<Object>} containing item and whether more than 1000 items were found
    */
   async #fuzzyGetChild(parentId, basename, ext, type) {
     const { log, drive, googleApiOpts } = this;
@@ -262,7 +262,7 @@ export class GoogleClient {
    * @param {String} parentId parent Id
    * @param {String} name child name
    * @param {String} type child mime type
-   * @returns {Object} item or null
+   * @returns {Promise<Object>} item or null
    */
   async #getChild(parentId, name, type) {
     const { drive, googleApiOpts } = this;

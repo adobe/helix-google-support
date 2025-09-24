@@ -45,7 +45,7 @@ declare class GoogleClient {
    *
    * @param opts
    */
-  static setItemCacheOptions(opts:object);
+  static setItemCacheOptions(opts:object):void;
 
   /**
    * Returns a url for a google drive id.
@@ -58,7 +58,7 @@ declare class GoogleClient {
 
   init():Promise<GoogleClient>;
 
-  generateAuthUrl(...args):Promise<string>;
+  generateAuthUrl(opts:Object):Promise<string>;
 
   /**
    * Sets the credentials
