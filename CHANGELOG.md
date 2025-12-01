@@ -1,3 +1,10 @@
+## [4.0.1](https://github.com/adobe/helix-google-support/compare/v4.0.0...v4.0.1) (2025-12-01)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#529](https://github.com/adobe/helix-google-support/issues/529)) ([bbfcd1e](https://github.com/adobe/helix-google-support/commit/bbfcd1eabe5cc4c0312688baa3c64ae0114f12c4))
+
 # [4.0.0](https://github.com/adobe/helix-google-support/compare/v3.3.5...v4.0.0) (2025-09-23)
 
 
