@@ -36,13 +36,13 @@
   "dependencies": {
     "@adobe/helix-shared-string": "^2.1.0",
     "googleapis": "150.0.1",
-    "googleapis-common": "8.0.0",
+    "googleapis-common": "8.0.1",
     "lru-cache": "^11.0.2"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "3.0.14",
     "@adobe/helix-shared-tokencache": "1.5.0",
-    "@eslint/config-helpers": "0.4.2",
+    "@eslint/config-helpers": "0.5.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "c8": "10.1.3",
