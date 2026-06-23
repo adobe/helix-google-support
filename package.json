@@ -36,7 +36,7 @@
   "dependencies": {
     "@adobe/helix-shared-string": "^2.1.0",
     "googleapis": "150.0.1",
-    "googleapis-common": "8.0.1",
+    "googleapis-common": "8.0.2",
     "lru-cache": "^11.0.2"
   },
   "devDependencies": {
@@ -52,7 +52,7 @@
     "eslint-plugin-import": "2.32.0",
     "husky": "9.1.7",
     "junit-report-builder": "5.1.2",
-    "lint-staged": "17.0.5",
+    "lint-staged": "17.0.7",
     "mocha": "11.7.6",
     "mocha-multi-reporters": "1.5.1",
     "mocha-suppress-logs": "0.6.0",
