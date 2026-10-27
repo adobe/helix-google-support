@@ -1,3 +1,10 @@
+## [4.0.7](https://github.com/adobe/helix-google-support/compare/v4.0.6...v4.0.7) (2026-10-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency googleapis-common to v9.3.0 ([#596](https://github.com/adobe/helix-google-support/issues/596)) ([e64988e](https://github.com/adobe/helix-google-support/commit/e64988eabb601789a9ed1808be4a4dcd8d7561b7))
+
 ## [4.0.6](https://github.com/adobe/helix-google-support/compare/v4.0.5...v4.0.6) (2026-10-05)
 
 
