@@ -559,8 +559,8 @@ describe('GoogleClient tests', () => {
   it('getToken works and is cached', async () => {
     nock('https://oauth2.googleapis.com')
       .post('/token')
-      .reply((uri, body) => {
-        assert.deepStrictEqual({ ...decode(body) }, {
+      .reply(async (req) => {
+        assert.deepStrictEqual({ ...decode(await req.text()) }, {
           code: '1234',
           client_id: 'fake',
           client_secret: 'fake',
@@ -623,8 +623,8 @@ describe('GoogleClient tests', () => {
 
     nock('https://oauth2.googleapis.com')
       .post('/token')
-      .reply((uri, body) => {
-        assert.deepStrictEqual({ ...decode(body) }, {
+      .reply(async (req) => {
+        assert.deepStrictEqual({ ...decode(await req.text()) }, {
           client_id: 'fake',
           client_secret: 'fake',
           grant_type: 'refresh_token',
